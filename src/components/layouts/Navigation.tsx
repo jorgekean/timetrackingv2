@@ -11,14 +11,15 @@ interface NavigationItemProps {
     text: string;
     to: string;
     activePath: string;
+    isCollapsed?: boolean;
 }
 
-const NavigationItem: React.FC<NavigationItemProps> = ({ icon, text, to, activePath }) => {
+const NavigationItem: React.FC<NavigationItemProps> = ({ icon, text, to, activePath, isCollapsed }) => {
     return (
-        <li className={`hover:bg-gray-300 hover:bg-opacity-50 p-2 rounded flex items-center space-x-3 ${activePath === to ? 'bg-gray-200' : ''}`}>
+        <li className={`hover:bg-gray-300 hover:bg-opacity-50 p-2 rounded flex items-center space-x-3 ${activePath === to ? 'bg-gray-300 bg-opacity-50' : ''}`}>
             <NavLink to={to} className="flex items-center">
                 {icon}
-                <span className="ml-2">{text}</span>
+                {!isCollapsed ? <span className="ml-2">{text}</span> : null}
             </NavLink>
         </li>
     );
@@ -38,7 +39,7 @@ const Navigation: React.FC = () => {
         text-cyan-950 dark:text-cyan-50
         ${isCollapsed ? 'w-20' : 'w-64'} 
         h-full p-4 shadow-lg transition-width 
-        border-r-4 border-gray-100
+        border-r-4 border-gray-100 dark:border-gray-700
         duration-300`}
         >
             {/* Toggle Button (Hamburger Icon) */}
@@ -64,24 +65,28 @@ const Navigation: React.FC = () => {
                     text="TIME TRACKING"
                     to="/"
                     activePath={location.pathname}
+                    isCollapsed={isCollapsed}
                 />
                 <NavigationItem
                     icon={<FaCoins size={30} />}
                     text="BILLING MANAGER"
                     to="/billingmanager"
                     activePath={location.pathname}
+                    isCollapsed={isCollapsed}
                 />
                 <NavigationItem
                     icon={<FaCloudArrowUp size={30} />}
                     text="ORACLE UPLOAD"
                     to="/oracleupload"
                     activePath={location.pathname}
+                    isCollapsed={isCollapsed}
                 />
                 <NavigationItem
                     icon={<FaCog size={30} />}
                     text="SETTINGS"
                     to="/settings"
                     activePath={location.pathname}
+                    isCollapsed={isCollapsed}
                 />
             </ul>
         </nav>

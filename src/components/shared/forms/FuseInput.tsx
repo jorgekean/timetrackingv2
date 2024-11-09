@@ -5,11 +5,13 @@ interface FuseInputProps {
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     placeholder?: string;
     type?: string;
+    name?: string;
 }
 
-const FuseInput: React.FC<FuseInputProps> = ({ value, onChange, placeholder = '', type = 'text' }) => {
+const FuseInput: React.FC<FuseInputProps> = ({ value, onChange, placeholder = '', type = 'text', name }) => {
     return (
         <input
+            name={name}
             type={type}
             value={value}
             onChange={onChange}

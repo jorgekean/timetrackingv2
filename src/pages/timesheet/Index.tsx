@@ -10,6 +10,7 @@
 import React, { useState } from "react"
 import TimesheetForm from "./TimesheetForm"
 import TimeTrackingTable from "./TimeTrackingTable"
+import Calendar from "./Calendar";
 
 const Timesheet = () => {
     //   const { timesheetDate, setTimesheetDate, miscTime } = useGlobalContext()
@@ -65,7 +66,10 @@ const Timesheet = () => {
 
     return (
         <React.Fragment>
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md sticky top-0 z-10">
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md sticky top-0 z-20">
+                <Calendar />
+            </div>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md sticky top-24 z-10">
                 <TimesheetForm />
             </div>
             <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">

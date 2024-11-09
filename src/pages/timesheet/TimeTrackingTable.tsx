@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Column, useTable } from "react-table"
 import { FaEdit, FaTrash } from 'react-icons/fa';
 
 interface TimeEntry {
@@ -94,55 +95,89 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = ({ entries, onEdit, 
         }, 500); // Duration should match the transition time
     };
 
+
+    const columns = React.useMemo(
+        () => [
+            {
+                Header: 'Description',
+                accessor: 'description',
+            },
+            {
+                Header: 'Project',
+                accessor: 'project',
+            },
+            {
+                Header: 'Duration',
+                accessor: 'duration',
+            },
+            {
+                Header: 'Actions',
+                accessor: 'actions',
+                Cell: ({ row }: any) => (
+                    <div className="flex justify-center">
+                        <button
+                            onClick={() => onEdit(row.original.id)}
+                            className="text-cyan-500 hover:text-cyan-700 mr-2"
+                        >
+                            <FaEdit size={20} />
+                        </button>
+                        <button
+                            onClick={() => handleDelete(row.original.id)}
+                            className="text-orange-500 hover:text-orange-700"
+                        >
+                            <FaTrash size={20} />
+                        </button>
+                    </div>
+                ),
+            },
+        ],
+        []
+    )
+
+    const {
+        getTableProps,
+        getTableBodyProps,
+        headerGroups,
+        rows,
+        prepareRow,
+    } = useTable({
+        columns,
+        data: entries,
+    })
+
     return (
         <div className="overflow-auto">
-            <table className="min-w-full bg-white dark:bg-gray-800  shadow-md rounded-lg overflow-hidden">
+            <table {...getTableProps()} className="min-w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
                 <thead>
-                    <tr className="bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300">
-
-                        <th className="p-3 text-left">Description</th>
-                        <th className="p-3 text-left">Project</th>
-                        <th className="p-3 text-center">Duration</th>
-                        <th className="p-3 text-center">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {entries.map((entry, index) => (
-                        <tr
-                            key={entry.id}
-                            className={`${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-500' : 'bg-white dark:bg-gray-600'}
-                                      ${deletingId === entry.id ? 'transition-transform transform scale-y-0' : 'transition-all'}
-                            hover:bg-gray-100 dark:hover:bg-gray-400`}
-                        >
-
-
-
-                            <td className="p-3">{entry.description}</td>
-                            <td className="p-3">
-                                <span
-                                    className={`text-cyan-800 text-sm font-medium py-1 px-3 rounded-md 
-                                        bg-cyan-300 bg-opacity-20 hover:bg-cyan-200 dark:bg-cyan-200 dark:hover:bg-cyan-100`}
-                                >
-                                    {entry.project}
-                                </span>
-                            </td>
-                            <td className="p-3 text-center">{entry.duration}</td>
-                            <td className="p-3 text-center">
-                                <button
-                                    onClick={() => onEdit(entry.id)}
-                                    className="text-cyan-500 hover:text-cyan-700 mr-2"
-                                >
-                                    <FaEdit size={20} />
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(entry.id)}
-                                    className="text-orange-500 hover:text-orange-700"
-                                >
-                                    <FaTrash size={20} />
-                                </button>
-                            </td>
+                    {headerGroups.map(headerGroup => (
+                        <tr {...headerGroup.getHeaderGroupProps()} className="bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300">
+                            {headerGroup.headers.map(column => (
+                                <th {...column.getHeaderProps()} className="p-3 text-left">
+                                    {column.render('Header')}
+                                </th>
+                            ))}
                         </tr>
                     ))}
+                </thead>
+                <tbody {...getTableBodyProps()}>
+                    {rows.map((row, index) => {
+                        prepareRow(row)
+                        return (
+                            <tr
+                                {...row.getRowProps()}
+                                className={`${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-500' : 'bg-white dark:bg-gray-600'
+                                    } ${deletingId === row.original.id ? 'transition-transform transform scale-y-0' : 'transition-all'} hover:bg-gray-100 dark:hover:bg-gray-400`}
+                            >
+                                {row.cells.map(cell => {
+                                    return (
+                                        <td {...cell.getCellProps()} className="p-3">
+                                            {cell.render('Cell')}
+                                        </td>
+                                    )
+                                })}
+                            </tr>
+                        )
+                    })}
                 </tbody>
             </table>
         </div>

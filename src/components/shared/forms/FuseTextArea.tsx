@@ -5,11 +5,13 @@ interface FuseTextAreaProps {
     onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
     placeholder?: string;
     rows?: number;
+    name?: string;
 }
 
-const FuseTextArea: React.FC<FuseTextAreaProps> = ({ value, onChange, placeholder = '', rows = 1 }) => {
+const FuseTextArea: React.FC<FuseTextAreaProps> = ({ value, onChange, placeholder = '', rows = 1, name }) => {
     return (
         <textarea
+            name={name}
             value={value}
             onChange={onChange}
             placeholder={placeholder}
