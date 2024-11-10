@@ -1,16 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Column, useTable } from "react-table"
 import { FaEdit, FaTrash } from 'react-icons/fa';
-
-interface TimeEntry {
-    id: number;
-    project: string;
-    description: string;
-    duration: string;
-}
+import { useGlobalContext } from '../../context/GlobalContext';
+import { TimesheetData } from '../../models/Timesheet';
+import { TimesheetService } from './TimesheetService';
 
 interface TimeTrackingTableProps {
-    entries: TimeEntry[];
+    // entries: TimesheetData[];
     onEdit: (id: number) => void;
     onDelete: (id: number) => void;
 }
@@ -81,7 +77,21 @@ const getColorForProject = (projectName: string) => {
 };
 
 
-const TimeTrackingTable: React.FC<TimeTrackingTableProps> = ({ entries, onEdit, onDelete }) => {
+const TimeTrackingTable: React.FC<TimeTrackingTableProps> = ({ onEdit, onDelete }) => {
+
+    const { timesheets, timesheetDate, setTimesheets } = useGlobalContext()
+    const timesheetService = TimesheetService()
+
+    useEffect(() => {
+        const fetchData = async () => {
+            // console.log
+            const timesheetsFromDB = await timesheetService.getTimesheetsOfTheDay()
+            console.log(timesheetsFromDB)
+            setTimesheets(timesheetsFromDB)
+        }
+
+        fetchData()
+    }, [timesheetDate])
 
     const [deletingId, setDeletingId] = useState<number | null>(null);
 
@@ -100,11 +110,20 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = ({ entries, onEdit, 
         () => [
             {
                 Header: 'Description',
-                accessor: 'description',
+                accessor: 'taskDescription',
             },
             {
                 Header: 'Project',
-                accessor: 'project',
+                accessor: 'client.client',
+                Cell: ({ row }: any) => (
+                    <span
+                        className={`text-cyan-800 text-sm font-medium py-1 px-3 rounded-md 
+                        bg-cyan-300 bg-opacity-20 hover:bg-cyan-200 dark:bg-cyan-200 dark:hover:bg-cyan-100`}
+                    >
+                        {row.original.client.client}
+                    </span>
+
+                )
             },
             {
                 Header: 'Duration',
@@ -142,44 +161,51 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = ({ entries, onEdit, 
         prepareRow,
     } = useTable({
         columns,
-        data: entries,
+        data: timesheets,
     })
 
     return (
         <div className="overflow-auto">
-            <table {...getTableProps()} className="min-w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
-                <thead>
-                    {headerGroups.map(headerGroup => (
-                        <tr {...headerGroup.getHeaderGroupProps()} className="bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300">
-                            {headerGroup.headers.map(column => (
-                                <th {...column.getHeaderProps()} className="p-3 text-left">
-                                    {column.render('Header')}
-                                </th>
-                            ))}
-                        </tr>
-                    ))}
-                </thead>
-                <tbody {...getTableBodyProps()}>
-                    {rows.map((row, index) => {
-                        prepareRow(row)
-                        return (
-                            <tr
-                                {...row.getRowProps()}
-                                className={`${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-500' : 'bg-white dark:bg-gray-600'
-                                    } ${deletingId === row.original.id ? 'transition-transform transform scale-y-0' : 'transition-all'} hover:bg-gray-100 dark:hover:bg-gray-400`}
-                            >
-                                {row.cells.map(cell => {
-                                    return (
-                                        <td {...cell.getCellProps()} className="p-3">
-                                            {cell.render('Cell')}
-                                        </td>
-                                    )
-                                })}
+            {timesheets.length === 0 ? (
+                <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                    <p className="text-lg">Time is precious, but this table looks a little empty. <span className='font-semibold'>Start logging</span> to keep track!</p>
+                </div>
+            ) :
+
+                (<table {...getTableProps()} className="min-w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+                    <thead>
+                        {headerGroups.map(headerGroup => (
+                            <tr {...headerGroup.getHeaderGroupProps()} className="bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300">
+                                {headerGroup.headers.map(column => (
+                                    <th {...column.getHeaderProps()} className="p-3 text-left">
+                                        {column.render('Header')}
+                                    </th>
+                                ))}
                             </tr>
-                        )
-                    })}
-                </tbody>
-            </table>
+                        ))}
+                    </thead>
+                    <tbody {...getTableBodyProps()}>
+                        {rows.map((row, index) => {
+                            prepareRow(row)
+                            return (
+                                <tr
+                                    {...row.getRowProps()}
+                                    className={`${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-500' : 'bg-white dark:bg-gray-600'
+                                        } ${deletingId === row.original.id ? 'transition-transform transform scale-y-0' : 'transition-all'} hover:bg-gray-100 dark:hover:bg-gray-400`}
+                                >
+                                    {row.cells.map(cell => {
+                                        return (
+                                            <td {...cell.getCellProps()} className="p-3">
+                                                {cell.render('Cell')}
+                                            </td>
+                                        )
+                                    })}
+                                </tr>
+                            )
+                        })}
+                    </tbody>
+                </table>)}
+
         </div>
     );
 };

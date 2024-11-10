@@ -35,25 +35,25 @@ const Calendar = ({ }: CalendarProps) => {
         const fetchWorkLocations = async () => {
             try {
 
-                // Assuming locationData is an array of objects with label and value properties
-                const formattedLocations = locationData.map((loc: any) => ({
-                    label: loc.description,
-                    value: loc.id,
-                }));
-                console.log(formattedLocations, "formattedLocations")
-                setWorkLocations(formattedLocations);
+                // // Assuming locationData is an array of objects with label and value properties
+                // const formattedLocations = locationData.map((loc: any) => ({
+                //     label: loc.description,
+                //     value: loc.id,
+                // }));
+                // console.log(formattedLocations, "formattedLocations")
+                setWorkLocations(locationData);
 
                 const workLocationSetting = await settingsService.getSettingByType("worklocation");
                 if (workLocationSetting) {
                     setTimesheetWorkLocation(
-                        formattedLocations.find((loc) => loc.value === workLocationSetting.value) || null
+                        locationData.find((loc) => loc.id === workLocationSetting.value) || null
                     );
                 }
 
                 const timesheets = await timesheetService.getTimesheetsOfTheDay();
                 if (timesheets && timesheets.length > 0) {
-                    const firstTimesheetLocation = formattedLocations.find(
-                        (loc) => loc.value === timesheets[0].workLocation
+                    const firstTimesheetLocation = locationData.find(
+                        (loc) => loc.id === timesheets[0].workLocation
                     );
                     setTimesheetWorkLocation(firstTimesheetLocation || null);
                 }
@@ -115,6 +115,8 @@ const Calendar = ({ }: CalendarProps) => {
                     items={workLocations}
                     selectedItem={timesheetWorkLocation}
                     onItemSelect={handleWorkLocationChange}
+                    labelKey={"description"}
+                    valueKey={"id"}
                 />
             </div>
         </form>

@@ -1,6 +1,8 @@
+import { BillingManagerModel } from "./BillingManager"
+
 export interface TimesheetData {
   id?: string
-  client: { client: string; taskCode: string; projectCode: string } | undefined
+  client: BillingManagerModel | null
   taskDescription: string
   timesheetDate: Date
   duration?: number

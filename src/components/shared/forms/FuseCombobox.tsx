@@ -2,32 +2,39 @@ import { Combobox, ComboboxButton, ComboboxInput, ComboboxOption, ComboboxOption
 import React, { useEffect, useState } from 'react';
 import { FaCaretDown } from 'react-icons/fa6';
 
-interface FuseComboboxItem {
-    label: string;
-    value: string;
-}
-
-interface FuseComboboxProps {
-    items: FuseComboboxItem[];
-    selectedItem: FuseComboboxItem | null | any;
-    onItemSelect: (item: FuseComboboxItem) => void;
+interface FuseComboboxProps<T> {
+    items: T[];
+    selectedItem: T | null;
+    onItemSelect: (item: T) => void;
+    labelKey: keyof T;
+    valueKey: keyof T;
     placeholder?: string;
+    onQueryChange?: (query: string) => void;
+    onSaveQuery?: (query: string) => void;
 }
 
-const FuseCombobox: React.FC<FuseComboboxProps> = ({
+const FuseCombobox = <T,>({
     items,
     selectedItem,
     onItemSelect,
+    labelKey,
+    valueKey,
     placeholder = 'Select an item',
-}) => {
+    onQueryChange,
+    onSaveQuery,
+}: FuseComboboxProps<T>) => {
     const [query, setQuery] = useState('');
+
     useEffect(() => {
-        console.log(items, query, "items")
-    }, [])
+        if (onQueryChange) {
+            onQueryChange(query);
+        }
+    }, [query, onQueryChange]);
+
     const filteredItems = query === ''
         ? items
         : items.filter((item) =>
-            item.label.toLowerCase().includes(query.toLowerCase())
+            String(item[labelKey]).toLowerCase().includes(query.toLowerCase())
         );
 
     return (
@@ -36,7 +43,7 @@ const FuseCombobox: React.FC<FuseComboboxProps> = ({
                 <div className="relative">
                     <ComboboxInput
                         className="w-full p-2 border dark:bg-gray-800 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                        displayValue={(item: FuseComboboxItem) => item?.label ?? ''}
+                        displayValue={(item: T) => (item ? String(item[labelKey]) : '')}
                         onChange={(e) => setQuery(e.target.value)}
                         placeholder={placeholder}
                     />
@@ -48,19 +55,28 @@ const FuseCombobox: React.FC<FuseComboboxProps> = ({
                     {filteredItems.length > 0 ? (
                         filteredItems.map((item) => (
                             <ComboboxOption
-                                key={item.value}
+                                key={String(item[valueKey])}
                                 value={item}
                                 className={({ active }) =>
                                     `cursor-pointer z-50 select-none relative py-2 pl-10 pr-4 ${active ? 'text-white bg-cyan-600' : 'text-gray-900 dark:text-white'
                                     }`
                                 }
                             >
-                                {item.label}
+                                {String(item[labelKey])}
                             </ComboboxOption>
                         ))
                     ) : (
-                        <div className="cursor-default select-none relative py-2 px-4 text-gray-700 dark:text-gray-200">
-                            No results found
+                        <div className="p-4 text-center">
+                            <p className="text-gray-700 dark:text-gray-200 mb-2">No results found</p>
+                            {onSaveQuery && (
+                                <button
+                                    type='button'
+                                    className="px-4 py-2 text-sm font-medium text-white bg-cyan-600 rounded-md hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                    onClick={() => onSaveQuery(query)}
+                                >
+                                    Save "{query}"
+                                </button>
+                            )}
                         </div>
                     )}
                 </ComboboxOptions>

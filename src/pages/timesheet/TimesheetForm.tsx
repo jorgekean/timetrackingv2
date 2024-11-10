@@ -32,10 +32,11 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
         runningTimesheet,
         setRunningTimesheet,
         timesheetWorkLocation,
+
     } = useGlobalContext()
 
     const initialFormData = {
-        client: undefined,
+        client: null,
         taskDescription: "",
         durationStr: "00:00:00",
         duration: undefined,
@@ -47,8 +48,13 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
 
     const [formData, setFormData] = useState<TimesheetData>(initialFormData)
 
-    const [options, setOptions] = useState<any[]>([])
+    const [projectOptions, setProjectOptions] = useState<BillingManagerModel[]>([])
     const [clientText, setClientText] = useState("")
+
+    const handleQueryChange = (query: string) => {
+        setClientText(query);
+        console.log("Current query:", query);  // Or handle it any way you want
+    };
 
     const db = DexieUtils<TimesheetData>({
         tableName: "timesheet",
@@ -64,6 +70,27 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
 
     // useEffect(() => {}, [])
 
+    const handleNewBillingSave = async (query: string) => {
+        var newBilling = {
+            client: query,
+            taskCode: "",
+            projectCode: "",
+        }
+        const id = await billingManagerDB.add(newBilling)
+        toast.success(
+            "New Billing saved! Go to Billing Manager page to update the project and task code.",
+            { position: "top-right", duration: 5000 }
+        )
+
+        await populateBillingOptions()
+    }
+
+    const populateBillingOptions = async () => {
+        // Fetch and populate options
+        const billings = await billingManagerDB.getAll()
+        setProjectOptions(billings)
+    }
+
     useEffect(() => {
         setFormData((prevState) => ({
             ...prevState,
@@ -77,13 +104,7 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
         try {
             const fetchData = async () => {
                 // Fetch and populate options
-                const billings = await billingManagerDB.getAll()
-                const billingOptions = billings.map((b) => ({
-                    client: b.client,
-                    value: b.taskCode,
-                    projectCode: b.projectCode,
-                }))
-                setOptions(billingOptions)
+                await populateBillingOptions()
 
                 // Populate form data if editing
                 if (editingTimesheet) {
@@ -130,7 +151,8 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
                     { position: "top-right", duration: 5000 }
                 )
 
-                newTimesheet.client = newBilling
+                const newlySavedBilling = await billingManagerDB.get(id)
+                newTimesheet.client = newlySavedBilling!
             }
 
             newTimesheet.createdDate = new Date()
@@ -272,11 +294,16 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
                 <div className="flex flex-col flex-1 max-w-64">
                     <FuseCombobox
                         // name="client"
-                        items={clients}
+                        items={projectOptions}
                         selectedItem={formData.client}
                         onItemSelect={(value) => setFormData({ ...formData, client: value })}
                         placeholder='Select a Project'
-                    ></FuseCombobox>
+                        labelKey={"client"}
+                        valueKey={"id"}
+                        // onQueryChange={handleQueryChange}
+                        onSaveQuery={handleNewBillingSave}
+                    >
+                    </FuseCombobox>
                 </div>
 
                 {/* Duration Input */}
