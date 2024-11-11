@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTable } from "react-table"
-import { FaEdit, FaRegClock, FaTrash } from 'react-icons/fa';
+import { FaArchive, FaEdit, FaRegClock, FaTrash } from 'react-icons/fa';
 import { useGlobalContext } from '../../context/GlobalContext';
 import { TimesheetService } from './TimesheetService';
 import { FaClock, FaClockRotateLeft, FaCoins } from 'react-icons/fa6';
@@ -10,6 +10,7 @@ import DexieUtils from '../../utils/dexie-utils';
 import { ErrorModel } from '../../models/ErrorModel';
 import toast from 'react-hot-toast';
 import { useBillingManagerContext } from './BillingManagerContext';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 interface BillingManagerTableProps {
     // entries: TimesheetData[];
@@ -18,19 +19,18 @@ interface BillingManagerTableProps {
 }
 
 const BillingManagerTable: React.FC<BillingManagerTableProps> = ({ }) => {
-    const [deletingId, setDeletingId] = useState<number | null>(null);
 
     const { modalState, setModalState, setEditingBillingManager } =
         useGlobalContext()
 
-    const { billings, setBillings } =
+    const { billings, setBillings, showArchived, setShowArchived } =
         useBillingManagerContext()
 
     // const [billingmanagerData, setBillingManagerModel] = useState<
     //     BillingManagerModel[]
     // >([])
 
-    const [showArchived, setShowArchived] = useState(false)
+    // const [showArchived, setShowArchived] = useState(false)
 
 
     const db = DexieUtils<BillingManagerModel>({
@@ -85,6 +85,118 @@ const BillingManagerTable: React.FC<BillingManagerTableProps> = ({ }) => {
         }
     }
 
+    const handleEdit = async (data: BillingManagerModel) => {
+        setEditingBillingManager(data)
+    }
+
+    const handleDelete = (id: string) => {
+        try {
+
+
+            setModalState({
+                title: "Delete",
+                showModal: true,
+                body: <div>Are you sure you want to delete this?</div>,
+                footer: (
+                    <div className="flex justify-end space-x-2">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setModalState({ ...modalState, showModal: false });
+                            }}
+                            className="bg-gray-600 text-white rounded-md px-4 py-2 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                        >
+                            No
+                        </button>
+                        <button
+                            onClick={() => {
+                                db.deleteEntity(id);
+                                toast.success("Billing deleted successfully", {
+                                    position: "top-right",
+                                });
+                                // refresh
+                                getBillingData();
+
+                                setModalState({ ...modalState, showModal: false });
+                            }}
+                            className="bg-red-600 text-white rounded-md px-4 py-2 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                        >
+                            Yes
+                        </button>
+                    </div>
+                ),
+            });
+        } catch (error: any) {
+            toast.error("Error deleting billing entry!", { position: "top-right" });
+            console.error("Failed to delete billing:", error);
+            errorDB.add({
+                message: error.message,
+                stack: error.stack || String(error),
+                timestamp: new Date(),
+            });
+        }
+    };
+
+
+    const handleArchiveToggle = (id: string, isArchived: boolean) => {
+        try {
+            const action = isArchived ? "Unarchive" : "Archive";
+            setModalState({
+                title: action,
+                showModal: true,
+                body: (
+                    <div>
+                        Are you sure you want to {action.toLowerCase()} this record?
+                    </div>
+                ),
+                footer: (
+                    <div className="flex justify-end space-x-2">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setModalState({ ...modalState, showModal: false });
+                            }}
+                            className="bg-red-600 text-white rounded-md px-4 py-2 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                        >
+                            No
+                        </button>
+                        <button
+                            onClick={async () => {
+                                const billing = await db.get(id);
+                                if (billing) {
+                                    billing.isArchived = !isArchived;
+                                    await db.update(billing);
+                                    toast.success(
+                                        `Billing ${action.toLowerCase()}d successfully`,
+                                        {
+                                            position: "top-right",
+                                        }
+                                    );
+                                    // refresh
+                                    getBillingData();
+
+                                    setModalState({ ...modalState, showModal: false });
+                                }
+                            }}
+                            className="bg-cyan-600 text-white rounded-md px-4 py-2 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                        >
+                            Yes
+                        </button>
+                    </div>
+                ),
+            });
+        } catch (error: any) {
+            toast.error("Error toggling archive status!", { position: "top-right" });
+            console.error("Failed to toggle archive status:", error);
+            errorDB.add({
+                message: error.message,
+                stack: error.stack || String(error),
+                timestamp: new Date(),
+            });
+        }
+    };
+
+
     const columns: Column<BillingManagerModel>[] = React.useMemo(
         () =>
             [
@@ -118,6 +230,16 @@ const BillingManagerTable: React.FC<BillingManagerTableProps> = ({ }) => {
 
     return (
         <div className="overflow-auto">
+            <div className="flex justify-end mb-2">
+                <button
+                    onClick={() => setShowArchived(!showArchived)}
+                    className="flex items-center px-4 py-2 border border-cyan-500 text-cyan-500 rounded-md hover:bg-cyan-50 focus:outline-none "
+                >
+                    {showArchived ? <FiEyeOff className="mr-2" /> : <FiEye className="mr-2" />}
+                    {showArchived ? "Hide Archived" : "Show Archived"}
+                </button>
+            </div>
+
             {billings.length === 0 ? (
                 <div className="p-4 text-center text-gray-500 dark:text-gray-400">
                     <div className="flex items-center justify-center space-x-3">
@@ -138,6 +260,7 @@ const BillingManagerTable: React.FC<BillingManagerTableProps> = ({ }) => {
                                         {column.render('Header')}
                                     </th>
                                 ))}
+                                <th></th>
                             </tr>
                         ))}
                     </thead>
@@ -147,8 +270,8 @@ const BillingManagerTable: React.FC<BillingManagerTableProps> = ({ }) => {
                             return (
                                 <tr
                                     {...row.getRowProps()}
-                                    className={`${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-500' : 'bg-white dark:bg-gray-600'
-                                        } ${deletingId === row.original.id ? 'transition-transform transform scale-y-0' : 'transition-all'} hover:bg-gray-100 dark:hover:bg-gray-400`}
+                                    className={`${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-500' : 'bg-white dark:bg-gray-600'} 
+                                                               hover:bg-gray-100 dark:hover:bg-gray-400`}
                                 >
                                     {row.cells.map(cell => {
                                         return (
@@ -157,6 +280,34 @@ const BillingManagerTable: React.FC<BillingManagerTableProps> = ({ }) => {
                                             </td>
                                         )
                                     })}
+
+                                    <td className="flex justify-end space-x-2 p-2">
+                                        <button
+                                            onClick={() => handleEdit(row.original as BillingManagerModel)}
+                                            className="text-cyan-500 hover:text-cyan-700"
+                                            title="Edit"
+                                        >
+                                            <FaEdit size={20} />
+                                        </button>
+
+                                        <button
+                                            onClick={() => handleDelete(row.original.id as string)}
+                                            className="text-red-500 hover:text-red-700"
+                                            title="Delete"
+                                        >
+                                            <FaTrash size={20} />
+                                        </button>
+
+                                        <button
+                                            onClick={() => handleArchiveToggle(row.original.id as string, row.original.isArchived!)}
+                                            className={`${row.original.isArchived ? 'text-green-500 hover:text-green-700' : 'text-yellow-500 hover:text-yellow-700'}`}
+                                            title={row.original.isArchived ? "Unarchive" : "Archive"}
+                                        >
+                                            <FaArchive size={20} />
+                                        </button>
+                                    </td>
+
+
                                 </tr>
                             )
                         })}

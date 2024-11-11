@@ -143,7 +143,7 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = ({ onEdit, onDelete 
                         </button>
                         <button
                             onClick={() => handleDelete(row.original.id)}
-                            className="text-orange-500 hover:text-orange-700"
+                            className="text-red-500 hover:text-red-700"
                         >
                             <FaTrash size={20} />
                         </button>

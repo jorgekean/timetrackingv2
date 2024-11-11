@@ -5,17 +5,20 @@ import { BillingManagerModel } from "../../models/BillingManager"
 // Define action types
 enum ActionType {
     SET_BILLINGS = "SET_BILLINGS",
+    SET_SHOWARCHIVED = "SET_SHOWARCHIVED",
 }
 
 
 // State interface with action type union
 interface BillingManagerData {
-    billings: BillingManagerModel[]
+    billings: BillingManagerModel[],
+    showArchived: boolean
 }
 
 
 interface BillingManagerContextValue extends BillingManagerData {
     setBillings: (billings: BillingManagerModel[]) => void
+    setShowArchived: (showArchived: boolean) => void
 }
 
 interface Action {
@@ -24,13 +27,16 @@ interface Action {
 }
 
 const initialState: BillingManagerData = {
-    billings: []
+    billings: [],
+    showArchived: false
 }
 
 const reducer = (state: BillingManagerData, action: Action): BillingManagerData => {
     switch (action.type) {
         case ActionType.SET_BILLINGS:
             return { ...state, billings: action.payload }
+        case ActionType.SET_SHOWARCHIVED:
+            return { ...state, showArchived: action.payload }
         default:
             return state
     }
@@ -39,7 +45,8 @@ const reducer = (state: BillingManagerData, action: Action): BillingManagerData 
 export const BillingManagerContext = createContext<BillingManagerContextValue>({
     ...initialState,
 
-    setBillings: () => { }
+    setBillings: () => { },
+    setShowArchived: () => { }
 })
 
 type BillingManagerContextProviderProps = {
@@ -49,15 +56,20 @@ type BillingManagerContextProviderProps = {
 const BillingManagerContextProvider = ({ children }: BillingManagerContextProviderProps) => {
     const [state, dispatch] = useReducer(reducer, initialState)
 
-    const setBillings = (locations: any[]) => {
-        dispatch({ type: ActionType.SET_BILLINGS, payload: locations })
+    const setBillings = (billings: any[]) => {
+        dispatch({ type: ActionType.SET_BILLINGS, payload: billings })
+    }
+
+    const setShowArchived = (showArchived: boolean) => {
+        dispatch({ type: ActionType.SET_SHOWARCHIVED, payload: showArchived })
     }
 
     return (
         <BillingManagerContext.Provider
             value={{
                 ...state,
-                setBillings
+                setBillings,
+                setShowArchived
             }}
         >
             {children}

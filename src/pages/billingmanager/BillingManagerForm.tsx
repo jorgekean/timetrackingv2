@@ -8,6 +8,7 @@ import { BillingManagerModel } from '../../models/BillingManager';
 import { BillingManagerService } from './BillingManagerService';
 import { ErrorModel } from '../../models/ErrorModel';
 import toast from 'react-hot-toast';
+import { useBillingManagerContext } from './BillingManagerContext';
 
 interface BillingManagerFormProps { }
 
@@ -31,6 +32,9 @@ const BillingManagerForm: React.FC<BillingManagerFormProps> = () => {
 
     const { editingBillingManager, setEditingBillingManager } =
         useGlobalContext()
+
+    const { showArchived } =
+        useBillingManagerContext()
 
     const [formData, setFormData] = useState<BillingManagerModel>(initialData)
 
@@ -193,7 +197,7 @@ const BillingManagerForm: React.FC<BillingManagerFormProps> = () => {
         }
 
         // upadate state
-        billingManagerService.refreshBillingsState()
+        billingManagerService.refreshBillingsState(showArchived)
     }
 
     return (

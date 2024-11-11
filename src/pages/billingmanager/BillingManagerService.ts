@@ -13,8 +13,11 @@ export const BillingManagerService = () => {
         tableName: "billingManager",
     })
 
-    const refreshBillingsState = async () => {
-        const billingsFromDB = (await db.getAll())
+    const refreshBillingsState = async (showArchived: boolean) => {
+        let billingsFromDB = (await db.getAll())
+        if (!showArchived) {
+            billingsFromDB = billingsFromDB.filter(f => !f.isArchived)
+        }
 
         setBillings(billingsFromDB)
     }
