@@ -1,3 +1,4 @@
+import BillingManager from "./pages/billingmanager/Index"
 import Timesheet from "./pages/timesheet/Index"
 
 const routes = [
@@ -13,10 +14,10 @@ const routes = [
     //     path: "timetracking",
     //     element: <Timesheet />,
     // },
-    // {
-    //     path: "billingmanager",
-    //     element: <BillingManager />,
-    // },
+    {
+        path: "billingmanager",
+        element: <BillingManager />,
+    },
     // {
     //     path: "settings",
     //     element: <SettingsPage />,

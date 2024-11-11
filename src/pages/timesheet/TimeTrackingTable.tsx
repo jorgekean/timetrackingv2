@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Column, useTable } from "react-table"
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { useTable } from "react-table"
+import { FaEdit, FaRegClock, FaTrash } from 'react-icons/fa';
 import { useGlobalContext } from '../../context/GlobalContext';
-import { TimesheetData } from '../../models/Timesheet';
 import { TimesheetService } from './TimesheetService';
+import { FaClock, FaClockRotateLeft } from 'react-icons/fa6';
+import { FcAlarmClock, FcClock } from 'react-icons/fc';
 
 interface TimeTrackingTableProps {
     // entries: TimesheetData[];
@@ -168,7 +169,12 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = ({ onEdit, onDelete 
         <div className="overflow-auto">
             {timesheets.length === 0 ? (
                 <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-                    <p className="text-lg">Time is precious, but this table looks a little empty. <span className='font-semibold'>Start logging</span> to keep track!</p>
+                    <div className="flex items-center justify-center space-x-3">
+                        <FaRegClock className="text-cyan-500 animate-pulse" size={50} />
+                        <p className="text-lg">
+                            Time is precious, but this table looks a little empty. <span className="font-semibold">Start logging</span> to keep track!
+                        </p>
+                    </div>
                 </div>
             ) :
 
