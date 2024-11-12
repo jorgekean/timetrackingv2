@@ -158,7 +158,7 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
             newTimesheet.createdDate = new Date()
 
             // set timesheet work location
-            newTimesheet.workLocation = timesheetWorkLocation
+            newTimesheet.workLocation = timesheetWorkLocation.id
 
             if (runningTimesheet) {
                 runningTimesheet.running = false

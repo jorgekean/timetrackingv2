@@ -3,8 +3,11 @@ import { useTable } from "react-table"
 import { FaEdit, FaRegClock, FaTrash } from 'react-icons/fa';
 import { useGlobalContext } from '../../context/GlobalContext';
 import { TimesheetService } from './TimesheetService';
-import { FaClock, FaClockRotateLeft } from 'react-icons/fa6';
-import { FcAlarmClock, FcClock } from 'react-icons/fc';
+import DexieUtils from '../../utils/dexie-utils';
+import { TimesheetData } from '../../models/Timesheet';
+import { ErrorModel } from '../../models/ErrorModel';
+import { MiscTimeData } from '../../models/MiscTime';
+import { SettingsService } from '../settings/SettingsService';
 
 interface TimeTrackingTableProps {
     // entries: TimesheetData[];
@@ -81,7 +84,23 @@ const getColorForProject = (projectName: string) => {
 const TimeTrackingTable: React.FC<TimeTrackingTableProps> = ({ onEdit, onDelete }) => {
 
     const { timesheets, timesheetDate, setTimesheets } = useGlobalContext()
+
+
+    const db = DexieUtils<TimesheetData>({
+        tableName: "timesheet",
+    })
+    const copiedTimesheetsDB = DexieUtils<TimesheetData>({
+        tableName: "copiedTimesheet",
+    })
+    const errorDB = DexieUtils<ErrorModel>({
+        tableName: "fuse-logs",
+    })
+    const miscDB = DexieUtils<MiscTimeData>({
+        tableName: "miscTime",
+    })
+
     const timesheetService = TimesheetService()
+    const settingsService = SettingsService()
 
     useEffect(() => {
         const fetchData = async () => {
@@ -96,16 +115,25 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = ({ onEdit, onDelete 
 
     const [deletingId, setDeletingId] = useState<number | null>(null);
 
-    const handleDelete = (id: number) => {
-        // Set the ID of the entry being deleted to trigger the animation
-        setDeletingId(id);
-        // Wait for the animation to finish before actually deleting the entry
-        setTimeout(() => {
-            onDelete(id);
-            setDeletingId(null);
-        }, 500); // Duration should match the transition time
-    };
+    const handleDelete = async (id: string) => {
+        try {
+            // Implement delete logic here
 
+            await db.deleteEntity(id)
+
+            // refresh
+            const timesheetsOfToday = await timesheetService.getTimesheetsOfTheDay()
+            setTimesheets(timesheetsOfToday)
+        } catch (error: any) {
+            console.error("Error deleting data:", error)
+
+            errorDB.add({
+                message: error.message,
+                stack: error.stack || String(error), // Use stack or stringify error
+                timestamp: new Date(),
+            })
+        }
+    }
 
     const columns = React.useMemo(
         () => [
@@ -150,7 +178,7 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = ({ onEdit, onDelete 
                     </div>
                 ),
             },
-        ],
+        ] as any,
         []
     )
 
@@ -197,7 +225,7 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = ({ onEdit, onDelete 
                                 <tr
                                     {...row.getRowProps()}
                                     className={`${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-500' : 'bg-white dark:bg-gray-600'
-                                        } ${deletingId === row.original.id ? 'transition-transform transform scale-y-0' : 'transition-all'} hover:bg-gray-100 dark:hover:bg-gray-400`}
+                                        } hover:bg-gray-100 dark:hover:bg-gray-400`}
                                 >
                                     {row.cells.map(cell => {
                                         return (

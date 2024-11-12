@@ -46,7 +46,7 @@ const Calendar = ({ }: CalendarProps) => {
                 const workLocationSetting = await settingsService.getSettingByType("worklocation");
                 if (workLocationSetting) {
                     setTimesheetWorkLocation(
-                        locationData.find((loc) => loc.id === workLocationSetting.value) || null
+                        locationData.find((loc) => loc.id === workLocationSetting.value.id) || null
                     );
                 }
 
@@ -88,7 +88,7 @@ const Calendar = ({ }: CalendarProps) => {
 
         const tsOfTheDay = await timesheetService.getTimesheetsOfTheDay();
         tsOfTheDay.forEach(async (ts) => {
-            ts.workLocation = selectedItem.value;
+            ts.workLocation = selectedItem.id;
             await timesheetsDB.update(ts);
         });
     };

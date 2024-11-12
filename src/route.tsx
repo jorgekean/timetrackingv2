@@ -1,4 +1,5 @@
 import BillingManager from "./pages/billingmanager/Index"
+import Settings from "./pages/settings/Index"
 import Timesheet from "./pages/timesheet/Index"
 
 const routes = [
@@ -18,9 +19,9 @@ const routes = [
         path: "billingmanager",
         element: <BillingManager />,
     },
-    // {
-    //     path: "settings",
-    //     element: <SettingsPage />,
-    // },
+    {
+        path: "settings",
+        element: <Settings />,
+    },
 ]
 export default routes
