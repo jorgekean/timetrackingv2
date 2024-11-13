@@ -254,7 +254,8 @@ const BillingManagerTable: React.FC<BillingManagerTableProps> = ({ }) => {
                 (<table {...getTableProps()} className="min-w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
                     <thead>
                         {headerGroups.map(headerGroup => (
-                            <tr {...headerGroup.getHeaderGroupProps()} className="bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300">
+                            <tr {...headerGroup.getHeaderGroupProps()}
+                                className="bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300">
                                 {headerGroup.headers.map(column => (
                                     <th {...column.getHeaderProps()} className="p-3 text-left">
                                         {column.render('Header')}

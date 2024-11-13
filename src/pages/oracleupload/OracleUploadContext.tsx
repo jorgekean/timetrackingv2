@@ -6,6 +6,7 @@ export interface Week {
 }
 
 interface OracleUploadTask {
+    id: string;
     client: string;
     taskDescription: string;
     projectCode: string;

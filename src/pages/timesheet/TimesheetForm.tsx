@@ -158,7 +158,7 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
             newTimesheet.createdDate = new Date()
 
             // set timesheet work location
-            newTimesheet.workLocation = timesheetWorkLocation.id
+            newTimesheet.workLocation = timesheetWorkLocation
 
             if (runningTimesheet) {
                 runningTimesheet.running = false
@@ -200,9 +200,8 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
                 newTimesheet.duration = !newTimesheet.duration
                     ? 0
                     : newTimesheet.duration
-                // alert(newTimesheet.duration)
                 newTimesheet.clientStr = newTimesheet.clientStr ?? clientText
-                newTimesheet.duration = 2000
+                // newTimesheet.duration = 2000
                 const id = await db.add(newTimesheet)
 
                 // set running timesheet state

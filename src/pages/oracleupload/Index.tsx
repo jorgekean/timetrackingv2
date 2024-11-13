@@ -2,6 +2,7 @@ import React from "react";
 import OracleUploadTable from "./OracleUploadTable";
 import OracleUploadContextProvider from "./OracleUploadContext";
 import OracleUploadFilters from "./OracleUploadFilters";
+import OracleUploadFooter from "./OracleUploadFooter";
 
 
 
@@ -16,6 +17,9 @@ const OracleUpload = () => {
                 </div>
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
                     <OracleUploadTable />
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                    <OracleUploadFooter />
                 </div>
             </OracleUploadContextProvider>
         </React.Fragment>

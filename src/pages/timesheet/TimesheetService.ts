@@ -2,6 +2,7 @@ import React from "react"
 import { useGlobalContext } from "../../context/GlobalContext";
 import { TimesheetData } from "../../models/Timesheet"
 import DexieUtils from "../../utils/dexie-utils"
+import { v4 as uuidv4 } from "uuid"
 
 export const TimesheetService = () => {
     const {
@@ -78,6 +79,7 @@ export const TimesheetService = () => {
 
             if (!entry) {
                 entry = {
+                    id: uuidv4(),
                     client: ts.client.client,
                     projectCode: ts.client.projectCode,
                     taskCode: ts.client.taskCode,

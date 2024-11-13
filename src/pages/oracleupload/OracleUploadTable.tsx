@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { Trash2 } from "react-feather";
 import { useTable, Column } from "react-table";
 import { useOracleUploadContext } from "./OracleUploadContext";
+import { FaTrash } from "react-icons/fa6";
 
 // interface Task {
 //     Description: string;
@@ -26,10 +27,13 @@ interface OracleUploadTableProps {
 
 const OracleUploadTable: React.FC<OracleUploadTableProps> = () => {
 
-    const { toUpload } = useOracleUploadContext()
+    const { toUpload, setToUpload } = useOracleUploadContext()
 
-    const handleRemove = async () => {
-
+    const handleDelete = async (id: string) => {
+        // Remove the row by index
+        let updatedRow = toUpload.filter((x) => x.id !== id)
+        console.log(updatedRow)
+        setToUpload(updatedRow)
     }
 
     const columns = useMemo(
@@ -46,29 +50,22 @@ const OracleUploadTable: React.FC<OracleUploadTableProps> = () => {
             { Header: "Thu", accessor: "thuHours" },
             { Header: "Fri", accessor: "friHours" },
             { Header: "Sat", accessor: "satHours" },
-            { Header: "Actions", accessor: "id" },
+            {
+                Header: "Actions", accessor: "actions",
+                Cell: ({ row }: any) => (
+                    <div className="flex justify-center">
+                        <button
+                            onClick={() => handleDelete(row.original.id)}
+                            className="text-orange-500 hover:text-orange-700"
+                        >
+                            <FaTrash size={20} />
+                        </button>
+                    </div>
+                ),
+            },
         ],
-        []
+        [toUpload]
     )
-    // const updatedColumns = React.useMemo(
-    //     () => [
-    //         ...columns,
-    //         {
-    //             Header: "Actions",
-    //             id: "actions",
-    //             Cell: ({ row }: { row: any }) => (
-    //                 <button
-    //                     title="Remove"
-    //                     onClick={() => handleRemove(row.index)}
-    //                     className="text-red-500 hover:text-red-700 p-1"
-    //                 >
-    //                     <Trash2 size={16} />
-    //                 </button>
-    //             ),
-    //         },
-    //     ],
-    //     [columns, handleRemove]
-    // );
 
     const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
         useTable({
@@ -120,8 +117,7 @@ const OracleUploadTable: React.FC<OracleUploadTableProps> = () => {
                         <tr
                             key={key}
                             {...restHeaderGroupProps}
-                            className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
-                        >
+                            className="bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300">
                             {headerGroup.headers.map((column) => {
                                 const { key: columnKey, ...restColumnProps } = column.getHeaderProps();
                                 return (
@@ -140,12 +136,13 @@ const OracleUploadTable: React.FC<OracleUploadTableProps> = () => {
             </thead>
 
             <tbody {...getTableBodyProps()}>
-                {rows.map((row) => {
-                    prepareRow(row);
+                {rows.map((row, index) => {
+                    prepareRow(row,);
                     return (
                         <tr
                             {...row.getRowProps()}
-                            className="hover:bg-gray-50 dark:hover:bg-gray-600"
+                            className={`${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-500' : 'bg-white dark:bg-gray-600'} 
+                                                               hover:bg-gray-100 dark:hover:bg-gray-400`}
                         >
                             {row.cells.map((cell) => (
                                 <td
