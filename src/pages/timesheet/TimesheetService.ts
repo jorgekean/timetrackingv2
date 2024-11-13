@@ -80,7 +80,7 @@ export const TimesheetService = () => {
                 entry = {
                     client: ts.client.client,
                     projectCode: ts.client.projectCode,
-                    taskCode: ts.client.value,
+                    taskCode: ts.client.taskCode,
                     taskDescription: ts.taskDescription,
                     sunHours: 0,
                     monHours: 0,

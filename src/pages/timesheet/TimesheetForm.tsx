@@ -202,6 +202,7 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
                     : newTimesheet.duration
                 // alert(newTimesheet.duration)
                 newTimesheet.clientStr = newTimesheet.clientStr ?? clientText
+                newTimesheet.duration = 2000
                 const id = await db.add(newTimesheet)
 
                 // set running timesheet state

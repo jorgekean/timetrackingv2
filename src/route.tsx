@@ -1,4 +1,5 @@
 import BillingManager from "./pages/billingmanager/Index"
+import OracleUpload from "./pages/oracleupload/Index"
 import Settings from "./pages/settings/Index"
 import Timesheet from "./pages/timesheet/Index"
 
@@ -9,7 +10,7 @@ const routes = [
     },
     {
         path: "oracleupload",
-        element: <div>Oracle Upload</div>,
+        element: <OracleUpload />,
     },
     // {
     //     path: "timetracking",

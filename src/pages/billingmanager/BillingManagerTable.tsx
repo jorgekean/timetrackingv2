@@ -292,7 +292,7 @@ const BillingManagerTable: React.FC<BillingManagerTableProps> = ({ }) => {
 
                                         <button
                                             onClick={() => handleDelete(row.original.id as string)}
-                                            className="text-red-500 hover:text-red-700"
+                                            className="text-orange-500 hover:text-orange-700"
                                             title="Delete"
                                         >
                                             <FaTrash size={20} />

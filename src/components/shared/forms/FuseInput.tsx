@@ -16,6 +16,7 @@ const FuseInput: React.FC<FuseInputProps> = ({ value, onChange, placeholder = ''
             value={value}
             onChange={onChange}
             placeholder={placeholder}
+            autoComplete='off'
             className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:bg-gray-800"
         />
     );
