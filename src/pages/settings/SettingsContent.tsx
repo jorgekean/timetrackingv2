@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { SettingModel } from "../../models/SettingModel";
 import DexieUtils from "../../utils/dexie-utils";
-import TimezoneSelect, { type ITimezone, allTimezones } from "react-timezone-select";
+import TimezoneSelect, { type ITimezone, ITimezoneOption, allTimezones } from "react-timezone-select";
 import { SettingsService } from "./SettingsService";
 import { useGlobalContext } from "../../context/GlobalContext"
 import locationData from "../../worklocations.json";
@@ -87,7 +87,7 @@ const SettingsContent = () => {
         fetchWorkLocations()
     }, []);
 
-    const handleTimezoneChange = async (timezone: ITimezone) => {
+    const handleTimezoneChange = async (timezone: ITimezoneOption) => {
         setSelectedTimezone(timezone)
         // Update timezone setting in IndexedDB
         const timezoneSetting = (await db.getAll()).find(

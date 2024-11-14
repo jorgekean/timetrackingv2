@@ -24,18 +24,27 @@ const FuseCombobox = <T,>({
     onSaveQuery,
 }: FuseComboboxProps<T>) => {
     const [query, setQuery] = useState('');
+    const [filteredItems, setFilteredItems] = useState(items)
 
     useEffect(() => {
+        console.log(query)
         if (onQueryChange) {
             onQueryChange(query);
         }
+
+        const fItems = query === ''
+            ? items
+            : items.filter((item) =>
+                String(item[labelKey]).toLowerCase().includes(query.toLowerCase())
+            );
+
+        setFilteredItems(fItems)
     }, [query, onQueryChange]);
 
-    const filteredItems = query === ''
-        ? items
-        : items.filter((item) =>
-            String(item[labelKey]).toLowerCase().includes(query.toLowerCase())
-        );
+    // Reset query when the combobox loses focus
+    const handleFocus = () => {
+        if (query && !selectedItem) setQuery("");  // Reset query to show all items on re-focus
+    };
 
     return (
         <Combobox value={selectedItem} onChange={onItemSelect}>
@@ -46,6 +55,7 @@ const FuseCombobox = <T,>({
                         displayValue={(item: T) => (item ? String(item[labelKey]) : '')}
                         onChange={(e) => setQuery(e.target.value)}
                         placeholder={placeholder}
+                        onFocus={handleFocus}
                     />
                     <ComboboxButton className="absolute inset-y-0 right-0 flex items-center pr-2">
                         <FaCaretDown className="text-cyan-600" size={20} />
@@ -68,7 +78,7 @@ const FuseCombobox = <T,>({
                     ) : (
                         <div className="p-4 text-center">
                             <p className="text-gray-700 dark:text-gray-200 mb-2">No results found</p>
-                            {onSaveQuery && (
+                            {onSaveQuery && query && (
                                 <button
                                     type='button'
                                     className="px-4 py-2 text-sm font-medium text-white bg-cyan-600 rounded-md hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"

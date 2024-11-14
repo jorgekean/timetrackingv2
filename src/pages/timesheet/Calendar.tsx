@@ -94,7 +94,7 @@ const Calendar = ({ }: CalendarProps) => {
     };
 
     return (
-        <form className="space-y-4 flex items-center">
+        <form className="flex items-center">
             <div className="flex items-center space-x-4">
                 <button type="button" onClick={handlePrevDay} className="text-gray-600 hover:text-gray-800 dark:hover:text-gray-300">
                     <ChevronLeft className="h-5 w-5" />
@@ -113,7 +113,7 @@ const Calendar = ({ }: CalendarProps) => {
                 <FuseCombobox
                     placeholder="Select work location"
                     items={workLocations}
-                    selectedItem={timesheetWorkLocation}
+                    selectedItem={timesheetWorkLocation || null}
                     onItemSelect={handleWorkLocationChange}
                     labelKey={"description"}
                     valueKey={"id"}

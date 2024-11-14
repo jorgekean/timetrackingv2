@@ -134,7 +134,7 @@ const BillingManagerForm: React.FC<BillingManagerFormProps> = () => {
                 if (
                     timesheet.client?.client === previousBilling.client &&
                     timesheet.client?.projectCode === previousBilling.projectCode &&
-                    timesheet.client?.value === previousBilling.taskCode
+                    timesheet.client?.taskCode === previousBilling.taskCode
                 ) {
                     // Update the timesheet fields to reflect the new billing information
                     return {

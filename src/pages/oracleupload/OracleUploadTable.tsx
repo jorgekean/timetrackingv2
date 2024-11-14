@@ -137,21 +137,23 @@ const OracleUploadTable: React.FC<OracleUploadTableProps> = () => {
 
             <tbody {...getTableBodyProps()}>
                 {rows.map((row, index) => {
-                    prepareRow(row,);
+                    prepareRow(row);
+
+                    const { key, ...rowProps } = row.getRowProps();
                     return (
-                        <tr
-                            {...row.getRowProps()}
+                        <tr key={row.id} {...rowProps}
                             className={`${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-500' : 'bg-white dark:bg-gray-600'} 
                                                                hover:bg-gray-100 dark:hover:bg-gray-400`}
                         >
-                            {row.cells.map((cell) => (
-                                <td
-                                    {...cell.getCellProps()}
-                                    className="px-4 py-2 text-gray-700 dark:text-gray-200 text-sm"
-                                >
-                                    {cell.render("Cell")}
-                                </td>
-                            ))}
+                            {row.cells.map(cell => {
+                                const { key, ...cellProps } = cell.getCellProps();
+
+                                return (
+                                    <td {...cellProps} key={cell.column.id} className="px-4 py-2 text-gray-700 dark:text-gray-200 text-sm">
+                                        {cell.render('Cell')}
+                                    </td>
+                                );
+                            })}
                         </tr>
                     );
                 })}

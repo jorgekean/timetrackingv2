@@ -22,7 +22,7 @@ const OracleUploadFilters: React.FC<FilterComponentProps> = () => {
     const timesheetService = TimesheetService()
 
     const { setToUpload, selectedWeek, selectedDays, setSelectedWeek, setSelectedDays } = useOracleUploadContext()
-    const { modalState, setModalState } = useGlobalContext()
+    // const { modalState, setModalState } = useGlobalContext()
 
     const generateWeeks = (): Week[] => {
         const weeks: Week[] = []
@@ -148,7 +148,7 @@ const OracleUploadFilters: React.FC<FilterComponentProps> = () => {
                     { value: "Friday", label: "Fri" },
                     { value: "Saturday", label: "Sat" },
                 ].map((day) => (
-                    <div className="ml-5">
+                    <div key={day.value} className="ml-5">
                         <Switch
                             checked={selectedDays.includes(day.value)}
                             onChange={() => handleDayFilterChange(day.value)}

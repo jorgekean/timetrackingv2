@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useTable } from "react-table"
+import { Column, useTable } from "react-table"
 import { FaArchive, FaEdit, FaRegClock, FaTrash } from 'react-icons/fa';
 import { useGlobalContext } from '../../context/GlobalContext';
-import { TimesheetService } from './TimesheetService';
+// import { TimesheetService } from './TimesheetService';
 import { FaClock, FaClockRotateLeft, FaCoins } from 'react-icons/fa6';
-import { FcAlarmClock, FcClock } from 'react-icons/fc';
+// import { FcAlarmClock, FcClock } from 'react-icons/fc';
 import { BillingManagerModel } from '../../models/BillingManager';
 import DexieUtils from '../../utils/dexie-utils';
 import { ErrorModel } from '../../models/ErrorModel';
@@ -19,19 +19,12 @@ interface BillingManagerTableProps {
 }
 
 const BillingManagerTable: React.FC<BillingManagerTableProps> = ({ }) => {
-
+    const [searchTerm, setSearchTerm] = useState('');
     const { modalState, setModalState, setEditingBillingManager } =
         useGlobalContext()
 
     const { billings, setBillings, showArchived, setShowArchived } =
         useBillingManagerContext()
-
-    // const [billingmanagerData, setBillingManagerModel] = useState<
-    //     BillingManagerModel[]
-    // >([])
-
-    // const [showArchived, setShowArchived] = useState(false)
-
 
     const db = DexieUtils<BillingManagerModel>({
         tableName: "billingManager",
@@ -43,20 +36,28 @@ const BillingManagerTable: React.FC<BillingManagerTableProps> = ({ }) => {
     useEffect(() => {
         const fetchData = async () => {
             // console.log
-            await getBillingData()
+            await getBillingData(searchTerm)
         }
 
         fetchData()
-    }, [showArchived])
+    }, [showArchived, searchTerm])
 
-    const getBillingData = async () => {
+    const getBillingData = async (searchTerm: string) => {
         try {
             db.getAll()
                 .then((data) => {
                     // Filter out archived records if showArchived is false
-                    const filteredData = showArchived
+                    let filteredData = showArchived
                         ? data
                         : data.filter((item) => !item.isArchived)
+
+                    if (searchTerm) {
+                        filteredData = filteredData.filter((item) =>
+                            item.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            item.projectCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            item.taskCode.toLowerCase().includes(searchTerm.toLowerCase())
+                        );
+                    }
 
                     // Sort the data by the client field
                     filteredData.sort((a, b) => a.client.localeCompare(b.client))
@@ -115,7 +116,7 @@ const BillingManagerTable: React.FC<BillingManagerTableProps> = ({ }) => {
                                     position: "top-right",
                                 });
                                 // refresh
-                                getBillingData();
+                                getBillingData(searchTerm);
 
                                 setModalState({ ...modalState, showModal: false });
                             }}
@@ -173,7 +174,7 @@ const BillingManagerTable: React.FC<BillingManagerTableProps> = ({ }) => {
                                         }
                                     );
                                     // refresh
-                                    getBillingData();
+                                    getBillingData(searchTerm);
 
                                     setModalState({ ...modalState, showModal: false });
                                 }
@@ -229,16 +230,25 @@ const BillingManagerTable: React.FC<BillingManagerTableProps> = ({ }) => {
         })
 
     return (
-        <div className="overflow-auto">
-            <div className="flex justify-end mb-2">
+        <div className="">
+            <div className="flex flex-wrap justify-between items-center mb-2 gap-4">
+                <input
+                    type="text"
+                    placeholder="Search..."
+                    onChange={(e) => {
+                        setSearchTerm(e.currentTarget.value);
+                    }}
+                    className="p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:bg-gray-800 w-full sm:w-1/2 md:w-1/3 lg:w-1/4"
+                />
                 <button
                     onClick={() => setShowArchived(!showArchived)}
-                    className="flex items-center px-4 py-2 border border-cyan-500 text-cyan-500 rounded-md hover:bg-cyan-50 focus:outline-none "
+                    className="flex items-center px-4 py-2 border border-cyan-500 text-cyan-500 rounded-md hover:bg-cyan-50 focus:outline-none"
                 >
                     {showArchived ? <FiEyeOff className="mr-2" /> : <FiEye className="mr-2" />}
                     {showArchived ? "Hide Archived" : "Show Archived"}
                 </button>
             </div>
+
 
             {billings.length === 0 ? (
                 <div className="p-4 text-center text-gray-500 dark:text-gray-400">

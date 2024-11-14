@@ -206,28 +206,43 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = ({ onEdit, onDelete 
 
                 (<table {...getTableProps()} className="min-w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
                     <thead>
-                        {headerGroups.map(headerGroup => (
-                            <tr {...headerGroup.getHeaderGroupProps()} className="bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300">
-                                {headerGroup.headers.map(column => (
-                                    <th {...column.getHeaderProps()} className="p-3 text-left">
-                                        {column.render('Header')}
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
+                        {headerGroups.map((headerGroup) => {
+                            const { key, ...restHeaderGroupProps } = headerGroup.getHeaderGroupProps();
+                            return (
+                                <tr
+                                    key={key}
+                                    {...restHeaderGroupProps}
+                                    className="bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300">
+                                    {headerGroup.headers.map((column) => {
+                                        const { key: columnKey, ...restColumnProps } = column.getHeaderProps();
+                                        return (
+                                            <th
+                                                key={columnKey}
+                                                {...restColumnProps}
+                                                className="px-4 py-2 text-left text-sm font-medium"
+                                            >
+                                                {column.render("Header")}
+                                            </th>
+                                        );
+                                    })}
+                                </tr>
+                            );
+                        })}
                     </thead>
                     <tbody {...getTableBodyProps()}>
                         {rows.map((row, index) => {
                             prepareRow(row)
+
+                            const { key, ...rowProps } = row.getRowProps();
                             return (
-                                <tr
-                                    {...row.getRowProps()}
+                                <tr key={row.id} {...rowProps}
                                     className={`${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-500' : 'bg-white dark:bg-gray-600'
                                         } hover:bg-gray-100 dark:hover:bg-gray-400`}
                                 >
                                     {row.cells.map(cell => {
+                                        const { key, ...cellProps } = cell.getCellProps();
                                         return (
-                                            <td {...cell.getCellProps()} className="p-3">
+                                            <td {...cellProps} key={cell.column.id} className="p-3">
                                                 {cell.render('Cell')}
                                             </td>
                                         )

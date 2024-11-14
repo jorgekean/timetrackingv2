@@ -51,10 +51,10 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
     const [projectOptions, setProjectOptions] = useState<BillingManagerModel[]>([])
     const [clientText, setClientText] = useState("")
 
-    const handleQueryChange = (query: string) => {
-        setClientText(query);
-        console.log("Current query:", query);  // Or handle it any way you want
-    };
+    // const handleQueryChange = (query: string) => {
+    //     setClientText(query);
+    //     // console.log("Current query:", query);  // Or handle it any way you want
+    // };
 
     const db = DexieUtils<TimesheetData>({
         tableName: "timesheet",
@@ -87,7 +87,7 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
 
     const populateBillingOptions = async () => {
         // Fetch and populate options
-        const billings = await billingManagerDB.getAll()
+        const billings = (await billingManagerDB.getAll()).filter(x => !x.isArchived)
         setProjectOptions(billings)
     }
 
@@ -267,6 +267,7 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
         event
     ) => {
         event.preventDefault()
+
         if (timesheetService.isValidTimeFormat(formData.durationStr!)) {
             await addTimesheet()
         } else {
@@ -275,6 +276,7 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
                 position: "top-right",
             })
         }
+
     }
 
     return (
