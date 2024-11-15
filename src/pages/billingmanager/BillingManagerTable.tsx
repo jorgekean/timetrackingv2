@@ -92,8 +92,6 @@ const BillingManagerTable: React.FC<BillingManagerTableProps> = ({ }) => {
 
     const handleDelete = (id: string) => {
         try {
-
-
             setModalState({
                 title: "Delete",
                 showModal: true,
@@ -110,8 +108,8 @@ const BillingManagerTable: React.FC<BillingManagerTableProps> = ({ }) => {
                             No
                         </button>
                         <button
-                            onClick={() => {
-                                db.deleteEntity(id);
+                            onClick={async () => {
+                                await db.deleteEntity(id);
                                 toast.success("Billing deleted successfully", {
                                     position: "top-right",
                                 });

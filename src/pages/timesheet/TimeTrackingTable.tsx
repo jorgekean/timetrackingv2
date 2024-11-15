@@ -9,6 +9,7 @@ import { ErrorModel } from '../../models/ErrorModel';
 import { MiscTimeData } from '../../models/MiscTime';
 import { SettingsService } from '../settings/SettingsService';
 import TimerComponent from './TimerComponent';
+import toast from 'react-hot-toast';
 
 interface TimeTrackingTableProps {
     // entries: TimesheetData[];
@@ -84,7 +85,7 @@ interface TimeTrackingTableProps {
 
 const TimeTrackingTable: React.FC<TimeTrackingTableProps> = () => {
 
-    const { timesheets, timesheetDate, setTimesheets, setEditingTimesheet } = useGlobalContext()
+    const { timesheets, timesheetDate, modalState, setTimesheets, setEditingTimesheet, setModalState } = useGlobalContext()
 
 
     const db = DexieUtils<TimesheetData>({
@@ -133,21 +134,49 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = () => {
 
     const handleDelete = async (id: string) => {
         try {
-            // Implement delete logic here
+            setModalState({
+                title: "Delete",
+                showModal: true,
+                body: <div>Are you sure you want to delete this?</div>,
+                footer: (
+                    <div className="flex justify-end space-x-2">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setModalState({ ...modalState, showModal: false });
+                            }}
+                            className="bg-gray-600 text-white rounded-md px-4 py-2 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                        >
+                            No
+                        </button>
+                        <button
+                            onClick={async () => {
+                                await db.deleteEntity(id)
+                                toast.success("Timesheet deleted successfully", {
+                                    position: "top-right",
+                                });
 
-            await db.deleteEntity(id)
+                                // refresh
+                                const timesheetsOfToday = await timesheetService.getTimesheetsOfTheDay()
+                                setTimesheets(timesheetsOfToday)
 
-            // refresh
-            const timesheetsOfToday = await timesheetService.getTimesheetsOfTheDay()
-            setTimesheets(timesheetsOfToday)
+                                setModalState({ ...modalState, showModal: false });
+                            }}
+                            className="bg-red-600 text-white rounded-md px-4 py-2 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                        >
+                            Yes
+                        </button>
+                    </div>
+                ),
+            });
         } catch (error: any) {
-            console.error("Error deleting data:", error)
+            toast.error("Error deleting timesheet entry!", { position: "top-right" });
 
             errorDB.add({
                 message: error.message,
-                stack: error.stack || String(error), // Use stack or stringify error
+                stack: error.stack || String(error),
                 timestamp: new Date(),
-            })
+            });
         }
     }
 
