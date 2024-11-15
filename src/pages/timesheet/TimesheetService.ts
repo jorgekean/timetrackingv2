@@ -244,6 +244,29 @@ export const TimesheetService = () => {
         return input // If not shorthand, return the original input
     }
 
+    const processPrevRunningTimesheet = async () => {
+        const timesheetsInDB = await getTimesheetsOfTheDay()
+        const prevRunningTS = timesheetsInDB.find(x => x.running);
+        let prevRunningDuration = 0;
+        if (prevRunningTS) {
+            prevRunningDuration = prevRunningTS.duration!// prev running duration when click on other timer
+        }
+
+        // calculate duration of prev running timesheet, based on fuse-startTime before it resets     
+        const currentTime = new Date()
+        const prevStartTime = localStorage.getItem("fuse-startTime") ? new Date(JSON.parse(localStorage.getItem("fuse-startTime")!)) : null
+        if (currentTime instanceof Date && prevStartTime instanceof Date) {
+            const elapsedTime = currentTime.getTime() - prevStartTime.getTime()
+
+            prevRunningDuration = prevRunningDuration! + Math.floor(elapsedTime / 1000)
+        }
+        // update prev running timesheet if any - set running false and refresh state    
+        if (prevRunningTS) {
+            await updateTimesheet({ ...prevRunningTS, duration: prevRunningDuration, running: false })
+            // setTimesheets(await getTimesheetsOfTheDay())
+        }
+    }
+
     return {
         getTimesheetsOfTheDay: getTimesheetsOfTheDay,
         setRunningToFalse,
@@ -255,5 +278,6 @@ export const TimesheetService = () => {
         timeToSeconds,
         secondsToTime,
         parseShorthandTime,
+        processPrevRunningTimesheet
     }
 }

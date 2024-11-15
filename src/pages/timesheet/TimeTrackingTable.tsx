@@ -118,18 +118,27 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = () => {
     const handleEdit = async (data: TimesheetData) => {
         // Implement delete logic here
 
-        // data.running = false
-        // await db.update(data)
+        if (data.running) {
+
+            // data.running = false
+            // await db.update(data)
+
+            await timesheetService.processPrevRunningTimesheet()
+
+            // setTimesheets(await timesheetService.getTimesheetsOfTheDay())
+        }
 
         // timerRefs.current[data.id!]?.pauseTimer(data)
         // alert(timerRefs.current[data.id!]?.duration)
         // const updatedTS = await db.get(data.id as string)
 
-        setEditingTimesheet({
-            ...data,
-            running: false,
-            // duration: timerRefs.current[data.id!]?.duration,
-        })
+        const updatedTimesheet = await db.get(data.id!)
+        setEditingTimesheet(updatedTimesheet)
+        // setEditingTimesheet({
+        //     ...updatedTimesheet,
+        //     running: false,
+        //     // duration: timerRefs.current[data.id!]?.duration,
+        // })
     }
 
     const handleDelete = async (id: string) => {
