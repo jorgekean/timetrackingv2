@@ -32,14 +32,14 @@ const FuseCombobox = <T,>({
             onQueryChange(query);
         }
 
-        const fItems = query === ''
+        const fItems = !query
             ? items
             : items.filter((item) =>
                 String(item[labelKey]).toLowerCase().includes(query.toLowerCase())
             );
 
         setFilteredItems(fItems)
-    }, [query, onQueryChange]);
+    }, [query, onQueryChange, items]);
 
     // Reset query when the combobox loses focus
     const handleFocus = () => {

@@ -288,11 +288,13 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = () => {
                         {rows.map((row, index) => {
                             prepareRow(row)
 
+                            const isRunning = row.original.running;
                             const { key, ...rowProps } = row.getRowProps();
                             return (
                                 <tr key={row.id} {...rowProps}
-                                    className={`${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-500' : 'bg-white dark:bg-gray-600'
-                                        } hover:bg-gray-100 dark:hover:bg-gray-400`}
+                                    className={`${isRunning ? 'text-cyan-600 font-semibold border-l-4 border-cyan-500' : ''}
+                                                 ${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-500' : 'bg-white dark:bg-gray-600'}
+                                                 hover:bg-gray-100 dark:hover:bg-gray-400 transition-colors`}
                                 >
                                     {row.cells.map(cell => {
                                         const { key, ...cellProps } = cell.getCellProps();

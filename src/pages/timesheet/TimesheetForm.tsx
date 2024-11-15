@@ -12,6 +12,7 @@ import { BillingManagerModel } from '../../models/BillingManager';
 import { ErrorModel } from '../../models/ErrorModel';
 import { TimesheetService } from './TimesheetService';
 import toast from 'react-hot-toast';
+import TimeInputComponent from './TimeInputComponent';
 
 interface TimesheetFormProps { }
 
@@ -26,8 +27,9 @@ const clients = [{ label: 'Client A', value: '01' }, { label: 'Client B', value:
 const TimesheetForm: React.FC<TimesheetFormProps> = () => {
     const {
         timesheetDate,
-        setTimesheets,
+        timesheets,
         editingTimesheet,
+        setTimesheets,
         setEditingTimesheet,
         runningTimesheet,
         setRunningTimesheet,
@@ -134,6 +136,28 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
         }
     }, [editingTimesheet])
 
+    const processPrevRunningTimesheet = async () => {
+        const prevRunningTS = timesheets.find(x => x.running);
+        let prevRunningDuration = 0;
+        if (prevRunningTS) {
+            prevRunningDuration = prevRunningTS.duration!// prev running duration when click on other timer
+        }
+
+        // calculate duration of prev running timesheet, based on fuse-startTime before it resets     
+        const currentTime = new Date()
+        const prevStartTime = localStorage.getItem("fuse-startTime") ? new Date(JSON.parse(localStorage.getItem("fuse-startTime")!)) : null
+        if (currentTime instanceof Date && prevStartTime instanceof Date) {
+            const elapsedTime = currentTime.getTime() - prevStartTime.getTime()
+
+            prevRunningDuration = prevRunningDuration! + Math.floor(elapsedTime / 1000)
+        }
+        // update prev running timesheet if any - set running false and refresh state    
+        if (prevRunningTS) {
+            await timesheetService.updateTimesheet({ ...prevRunningTS, duration: prevRunningDuration, running: false })
+            setTimesheets(await timesheetService.getTimesheetsOfTheDay())
+        }
+    }
+
     const addTimesheet = async () => {
         const newTimesheet: TimesheetData = formData
 
@@ -160,22 +184,15 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
             // set timesheet work location
             newTimesheet.workLocation = timesheetWorkLocation
 
-            // if (runningTimesheet) {
-            //     runningTimesheet.running = false
-            // }
-
             if (editingTimesheet) {
                 // Update existing timesheet
                 newTimesheet.id = editingTimesheet.id
                 newTimesheet.clientStr = newTimesheet.clientStr ?? clientText
                 await timesheetService.updateTimesheet(newTimesheet!)
 
-                // // Update state of running timesheet if necessary
-                // if (editingTimesheet.running) {
-                //     setRunningTimesheet(newTimesheet)
-                //     await timesheetService.setRunningToFalse(newTimesheet.id as string)
-                // }
             } else {
+
+                processPrevRunningTimesheet()
 
                 localStorage.setItem("fuse-startTime", JSON.stringify(new Date()))
 
@@ -183,7 +200,7 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
                 newTimesheet.duration = !newTimesheet.duration
                     ? 0
                     : newTimesheet.duration
-                newTimesheet.clientStr = newTimesheet.clientStr ?? clientText
+                // newTimesheet.clientStr = newTimesheet.clientStr ?? clientText
                 // newTimesheet.duration = 2000
                 const id = await db.add(newTimesheet)
 
@@ -293,6 +310,11 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
 
                 {/* Duration Input */}
                 <div className="flex flex-col flex-1 max-w-32">
+                    {/* <TimeInputComponent
+                        placeholder='00:00:00'
+                        value={formData.durationStr!}
+                        onChange={handleInputChange}
+                    /> */}
                     <FuseInput
                         name="durationStr"
                         value={formData.durationStr!}
