@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { FaHome, FaUsers, FaCog, FaBars, FaCoins } from 'react-icons/fa';
-import Logo from '../../assets/FUSE (4).png';
+import { FaCog, FaBars, FaCoins } from 'react-icons/fa';
+import Logo from '../../assets/Logo_Random.png';
 import { FaClockRotateLeft, FaCloudArrowUp } from 'react-icons/fa6';
 import { NavLink, useLocation } from 'react-router-dom'; // Import NavLink and useLocation
 

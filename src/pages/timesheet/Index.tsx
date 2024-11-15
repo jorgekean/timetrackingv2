@@ -33,7 +33,7 @@ const Timesheet = () => {
                 <TimesheetForm />
             </div>
             <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-                <TimeTrackingTable onEdit={handleEdit} onDelete={handleDelete} />
+                <TimeTrackingTable />
             </div>
         </React.Fragment>
     )

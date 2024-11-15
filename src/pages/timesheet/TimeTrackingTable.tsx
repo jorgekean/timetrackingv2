@@ -8,82 +8,83 @@ import { TimesheetData } from '../../models/Timesheet';
 import { ErrorModel } from '../../models/ErrorModel';
 import { MiscTimeData } from '../../models/MiscTime';
 import { SettingsService } from '../settings/SettingsService';
+import TimerComponent from './TimerComponent';
 
 interface TimeTrackingTableProps {
     // entries: TimesheetData[];
-    onEdit: (id: number) => void;
-    onDelete: (id: number) => void;
+    // onEdit: (id: number) => void;
+    // onDelete: (id: number) => void;
 }
 
-// List of background colors for badges
-const badgeColors = [
-    // Dark shades
-    'bg-gray-800',
-    'bg-blue-800',
-    'bg-green-800',
-    'bg-indigo-800',
-    'bg-purple-800',
-    'bg-teal-800',
-    'bg-red-800',
-    'bg-yellow-800',
-    'bg-orange-800',
-    'bg-pink-800',
-    'bg-cyan-800',
-    'bg-emerald-800',
-    'bg-lime-800',
-    'bg-amber-800',
-    'bg-violet-800',
+// // List of background colors for badges
+// const badgeColors = [
+//     // Dark shades
+//     'bg-gray-800',
+//     'bg-blue-800',
+//     'bg-green-800',
+//     'bg-indigo-800',
+//     'bg-purple-800',
+//     'bg-teal-800',
+//     'bg-red-800',
+//     'bg-yellow-800',
+//     'bg-orange-800',
+//     'bg-pink-800',
+//     'bg-cyan-800',
+//     'bg-emerald-800',
+//     'bg-lime-800',
+//     'bg-amber-800',
+//     'bg-violet-800',
 
-    // Medium shades
-    'bg-gray-600',
-    'bg-blue-600',
-    'bg-green-600',
-    'bg-indigo-600',
-    'bg-purple-600',
-    'bg-teal-600',
-    'bg-red-600',
-    'bg-yellow-600',
-    'bg-orange-600',
-    'bg-pink-600',
-    'bg-cyan-600',
-    'bg-emerald-600',
-    'bg-lime-600',
-    'bg-amber-600',
-    'bg-violet-600',
+//     // Medium shades
+//     'bg-gray-600',
+//     'bg-blue-600',
+//     'bg-green-600',
+//     'bg-indigo-600',
+//     'bg-purple-600',
+//     'bg-teal-600',
+//     'bg-red-600',
+//     'bg-yellow-600',
+//     'bg-orange-600',
+//     'bg-pink-600',
+//     'bg-cyan-600',
+//     'bg-emerald-600',
+//     'bg-lime-600',
+//     'bg-amber-600',
+//     'bg-violet-600',
 
-    // Light shades
-    'bg-gray-400',
-    'bg-blue-400',
-    'bg-green-400',
-    'bg-indigo-400',
-    'bg-purple-400',
-    'bg-teal-400',
-    'bg-red-400',
-    'bg-yellow-400',
-    'bg-orange-400',
-    'bg-pink-400',
-    'bg-cyan-400',
-    'bg-emerald-400',
-    'bg-lime-400',
-    'bg-amber-400',
-    'bg-violet-400',
-];
-// Function to consistently map a project name to a color
-const getColorForProject = (projectName: string) => {
-    // Generate a hash value using the reduce method
-    const hash = projectName
-        .split('')
-        .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+//     // Light shades
+//     'bg-gray-400',
+//     'bg-blue-400',
+//     'bg-green-400',
+//     'bg-indigo-400',
+//     'bg-purple-400',
+//     'bg-teal-400',
+//     'bg-red-400',
+//     'bg-yellow-400',
+//     'bg-orange-400',
+//     'bg-pink-400',
+//     'bg-cyan-400',
+//     'bg-emerald-400',
+//     'bg-lime-400',
+//     'bg-amber-400',
+//     'bg-violet-400',
+// ];
+// // Function to consistently map a project name to a color
+// const getColorForProject = (projectName: string) => {
+//     // Generate a hash value using the reduce method
+//     const hash = projectName
+//         .split('')
+//         .reduce((acc, char) => acc + char.charCodeAt(0), 0);
 
-    // Use the hash value to select a color from the badgeColors array
-    const index = hash % badgeColors.length;
-    return badgeColors[index];
-};
+//     // Use the hash value to select a color from the badgeColors array
+//     const index = hash % badgeColors.length;
+//     return badgeColors[index];
+// };
 
 
-const TimeTrackingTable: React.FC<TimeTrackingTableProps> = ({ onEdit, onDelete }) => {
+const TimeTrackingTable: React.FC<TimeTrackingTableProps> = () => {
 
-    const { timesheets, timesheetDate, setTimesheets } = useGlobalContext()
+    const { timesheets, timesheetDate, setTimesheets, setEditingTimesheet } = useGlobalContext()
 
 
     const db = DexieUtils<TimesheetData>({
@@ -112,6 +113,23 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = ({ onEdit, onDelete 
 
         fetchData()
     }, [timesheetDate])
+
+    const handleEdit = async (data: TimesheetData) => {
+        // Implement delete logic here
+
+        // data.running = false
+        // await db.update(data)
+
+        // timerRefs.current[data.id!]?.pauseTimer(data)
+        // alert(timerRefs.current[data.id!]?.duration)
+        // const updatedTS = await db.get(data.id as string)
+
+        setEditingTimesheet({
+            ...data,
+            running: false,
+            // duration: timerRefs.current[data.id!]?.duration,
+        })
+    }
 
     const handleDelete = async (id: string) => {
         try {
@@ -155,6 +173,14 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = ({ onEdit, onDelete 
             {
                 Header: 'Duration',
                 accessor: 'duration',
+                Cell: ({ row, value }: any) => (
+                    <TimerComponent
+                        key={row.original.id}
+                        //   ref={(el) => (timerRefs.current[row.original.id] = el)}
+                        timesheet={row.original}
+                    //   startTimer={toggleTimer}
+                    />
+                ),
             },
             {
                 Header: 'Actions',
@@ -162,7 +188,7 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = ({ onEdit, onDelete 
                 Cell: ({ row }: any) => (
                     <div className="flex justify-center">
                         <button
-                            onClick={() => onEdit(row.original.id)}
+                            onClick={() => handleEdit(row.original as TimesheetData)}
                             className="text-cyan-500 hover:text-cyan-700 mr-2"
                         >
                             <FaEdit size={20} />

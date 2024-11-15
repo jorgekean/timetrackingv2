@@ -160,9 +160,9 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
             // set timesheet work location
             newTimesheet.workLocation = timesheetWorkLocation
 
-            if (runningTimesheet) {
-                runningTimesheet.running = false
-            }
+            // if (runningTimesheet) {
+            //     runningTimesheet.running = false
+            // }
 
             if (editingTimesheet) {
                 // Update existing timesheet
@@ -170,29 +170,12 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
                 newTimesheet.clientStr = newTimesheet.clientStr ?? clientText
                 await timesheetService.updateTimesheet(newTimesheet!)
 
-                // Update state of running timesheet if necessary
-                if (editingTimesheet.running) {
-                    setRunningTimesheet(newTimesheet)
-                    await timesheetService.setRunningToFalse(newTimesheet.id as string)
-                }
+                // // Update state of running timesheet if necessary
+                // if (editingTimesheet.running) {
+                //     setRunningTimesheet(newTimesheet)
+                //     await timesheetService.setRunningToFalse(newTimesheet.id as string)
+                // }
             } else {
-                var storedTime = new Date(
-                    JSON.parse(localStorage.getItem("fuse-startTime")!)
-                )
-
-                // pause the running timesheet when clicked other rows timer
-                if (runningTimesheet) {
-                    runningTimesheet.running = false
-                    runningTimesheet.duration =
-                        runningTimesheet.duration! +
-                        Math.floor((new Date().getTime() - storedTime.getTime()) / 1000)
-
-                    runningTimesheet.timesheetDate = new Date(
-                        runningTimesheet.timesheetDate
-                    )
-                    runningTimesheet.createdDate = new Date(runningTimesheet.createdDate)
-                    await db.update(runningTimesheet)
-                }
 
                 localStorage.setItem("fuse-startTime", JSON.stringify(new Date()))
 
@@ -204,16 +187,16 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
                 // newTimesheet.duration = 2000
                 const id = await db.add(newTimesheet)
 
-                // set running timesheet state
-                if (newTimesheet.running) {
-                    const activeTimesheet = await db.get(id)
-                    setRunningTimesheet(activeTimesheet)
-                }
+                // // set running timesheet state
+                // if (newTimesheet.running) {
+                //     const activeTimesheet = await db.get(id)
+                //     setRunningTimesheet(activeTimesheet)
+                // }
             }
 
             // Refresh timesheets for the day
             setTimesheets(await timesheetService.getTimesheetsOfTheDay())
-            setEditingTimesheet(undefined)
+            // setEditingTimesheet(undefined)
 
             setFormData({
                 ...initialFormData,
