@@ -12,7 +12,7 @@ import { BillingManagerModel } from '../../models/BillingManager';
 import { ErrorModel } from '../../models/ErrorModel';
 import { TimesheetService } from './TimesheetService';
 import toast from 'react-hot-toast';
-import TimeInputComponent from './TimeInputComponent';
+import TimeInputComponent from './__noteused_TimeInputComponent';
 
 interface TimesheetFormProps { }
 
@@ -45,7 +45,7 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
         timesheetDate: timesheetDate,
         running: true,
         createdDate: new Date(),
-        workLocation: "",
+        workLocation: null,
     }
 
     const [formData, setFormData] = useState<TimesheetData>(initialFormData)

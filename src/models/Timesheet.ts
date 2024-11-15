@@ -8,7 +8,7 @@ export interface TimesheetData {
   duration?: number
   running: boolean
   createdDate: Date
-  workLocation: string | number
+  workLocation: { id: number, descrioption: string } | null
 
   clientStr?: string
   pausedTime?: Date | undefined

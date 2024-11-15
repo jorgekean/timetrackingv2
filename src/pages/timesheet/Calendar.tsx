@@ -53,7 +53,7 @@ const Calendar = ({ }: CalendarProps) => {
                 const timesheets = await timesheetService.getTimesheetsOfTheDay();
                 if (timesheets && timesheets.length > 0) {
                     const firstTimesheetLocation = locationData.find(
-                        (loc) => loc.id === timesheets[0].workLocation
+                        (loc) => loc.id === timesheets[0].workLocation?.id
                     );
                     setTimesheetWorkLocation(firstTimesheetLocation || null);
                 }

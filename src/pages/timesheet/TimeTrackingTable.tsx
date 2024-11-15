@@ -10,6 +10,9 @@ import { MiscTimeData } from '../../models/MiscTime';
 import { SettingsService } from '../settings/SettingsService';
 import TimerComponent from './TimerComponent';
 import toast from 'react-hot-toast';
+import { BsThreeDots, BsThreeDotsVertical } from 'react-icons/bs';
+import { Tooltip } from 'react-tooltip';
+import TimesheetMoreActions from './TimesheetMoreActions';
 
 interface TimeTrackingTableProps {
     // entries: TimesheetData[];
@@ -256,71 +259,92 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = () => {
     })
 
     return (
-        <div className="overflow-auto">
-            {timesheets.length === 0 ? (
-                <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-                    <div className="flex items-center justify-center space-x-3">
-                        <FaRegClock className="text-cyan-500 animate-pulse" size={50} />
-                        <p className="text-lg">
-                            Time is precious, but this table looks a little empty. <span className="font-semibold">Start logging</span> to keep track!
-                        </p>
+        <div className="space-y-4">
+            <TimesheetMoreActions />
+
+            {/* Table Section */}
+            <div className="overflow-auto">
+                {timesheets.length === 0 ? (
+                    <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center justify-center space-x-3">
+                            <FaRegClock className="text-cyan-500 animate-pulse" size={50} />
+                            <p className="text-lg">
+                                Time is precious, but this table looks a little empty. <span className="font-semibold">Start logging</span> to keep track!
+                            </p>
+                        </div>
                     </div>
-                </div>
-            ) :
+                ) : (
+                    <table
+                        {...getTableProps()}
+                        className="min-w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden"
+                    >
+                        <thead>
+                            {headerGroups.map((headerGroup) => {
+                                const { key, ...restHeaderGroupProps } = headerGroup.getHeaderGroupProps();
+                                return (
+                                    <tr
+                                        key={key}
+                                        {...restHeaderGroupProps}
+                                        className="bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300"
+                                    >
+                                        {headerGroup.headers.map((column) => {
+                                            const { key: columnKey, ...restColumnProps } = column.getHeaderProps();
+                                            return (
+                                                <th
+                                                    key={columnKey}
+                                                    {...restColumnProps}
+                                                    className="px-4 py-2 text-left text-sm font-medium"
+                                                >
+                                                    {column.render("Header")}
+                                                </th>
+                                            );
+                                        })}
+                                    </tr>
+                                );
+                            })}
+                        </thead>
+                        <tbody {...getTableBodyProps()}>
+                            {rows.map((row, index) => {
+                                prepareRow(row);
 
-                (<table {...getTableProps()} className="min-w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
-                    <thead>
-                        {headerGroups.map((headerGroup) => {
-                            const { key, ...restHeaderGroupProps } = headerGroup.getHeaderGroupProps();
-                            return (
-                                <tr
-                                    key={key}
-                                    {...restHeaderGroupProps}
-                                    className="bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300">
-                                    {headerGroup.headers.map((column) => {
-                                        const { key: columnKey, ...restColumnProps } = column.getHeaderProps();
-                                        return (
-                                            <th
-                                                key={columnKey}
-                                                {...restColumnProps}
-                                                className="px-4 py-2 text-left text-sm font-medium"
-                                            >
-                                                {column.render("Header")}
-                                            </th>
-                                        );
-                                    })}
-                                </tr>
-                            );
-                        })}
-                    </thead>
-                    <tbody {...getTableBodyProps()}>
-                        {rows.map((row, index) => {
-                            prepareRow(row)
-
-                            const isRunning = row.original.running;
-                            const { key, ...rowProps } = row.getRowProps();
-                            return (
-                                <tr key={row.id} {...rowProps}
-                                    className={`${isRunning ? 'text-cyan-600 font-semibold border-l-4 border-cyan-500' : ''}
-                                                 ${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-500' : 'bg-white dark:bg-gray-600'}
-                                                 hover:bg-gray-100 dark:hover:bg-gray-400 transition-colors`}
-                                >
-                                    {row.cells.map(cell => {
-                                        const { key, ...cellProps } = cell.getCellProps();
-                                        return (
-                                            <td {...cellProps} key={cell.column.id} className="p-3">
-                                                {cell.render('Cell')}
-                                            </td>
-                                        )
-                                    })}
-                                </tr>
-                            )
-                        })}
-                    </tbody>
-                </table>)}
-
+                                const isRunning = row.original.running;
+                                const { key, ...rowProps } = row.getRowProps();
+                                return (
+                                    <tr
+                                        key={row.id}
+                                        {...rowProps}
+                                        className={`${isRunning
+                                            ? "text-cyan-600 font-semibold border-l-4 border-cyan-500"
+                                            : ""
+                                            }
+                                                     ${index % 2 === 0
+                                                ? "bg-gray-50 dark:bg-gray-500"
+                                                : "bg-white dark:bg-gray-600"
+                                            }
+                                                     hover:bg-gray-100 dark:hover:bg-gray-400 transition-colors`}
+                                    >
+                                        {row.cells.map((cell) => {
+                                            const { key, ...cellProps } = cell.getCellProps();
+                                            return (
+                                                <td
+                                                    {...cellProps}
+                                                    key={cell.column.id}
+                                                    className="p-3"
+                                                >
+                                                    {cell.render("Cell")}
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                )}
+            </div>
         </div>
     );
+
 };
 
 export default TimeTrackingTable;
