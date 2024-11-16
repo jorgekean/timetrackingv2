@@ -1,16 +1,19 @@
 import React, { useState } from 'react'
 import { BsThreeDotsVertical } from 'react-icons/bs'
-import { FaCheck, FaTrash } from 'react-icons/fa';
+import { FaCheck, FaCopy, FaTimes, FaTrash } from 'react-icons/fa';
 import { useGlobalContext } from '../../context/GlobalContext';
 import toast from 'react-hot-toast';
 import DexieUtils from '../../utils/dexie-utils';
 import { TimesheetData } from '../../models/Timesheet';
 import { ErrorModel } from '../../models/ErrorModel';
+import { Tooltip } from 'react-tooltip';
+import { useTimesheetContext } from './TimesheetContext';
 
 const TimesheetMoreActions = () => {
     const [isOpen, setIsOpen] = useState(false);
 
     const { timesheets, modalState, setTimesheets, setModalState } = useGlobalContext();
+    const { showSelectOptions, selectedRows, setShowSelectOptions } = useTimesheetContext();
 
     const db = DexieUtils<TimesheetData>({
         tableName: "timesheet",
@@ -23,8 +26,8 @@ const TimesheetMoreActions = () => {
         setIsOpen(!isOpen);
     };
 
-    const handleSelectAll = () => {
-        console.log("Select All clicked");
+    const handleSelect = () => {
+        setShowSelectOptions(!showSelectOptions)
         setIsOpen(false);
     };
 
@@ -80,6 +83,18 @@ const TimesheetMoreActions = () => {
         setIsOpen(false);
     };
 
+    const handleClose = () => {
+        setIsOpen(false); // Close the dropdown
+    };
+
+    const handleDeleteSelected = () => {
+        // setIsOpen(false); // Close the dropdown
+    };
+
+    const handleCopySelected = () => {
+        // setIsOpen(false); // Close the dropdown
+    };
+
 
     return (
         <div className="flex items-center justify-between">
@@ -88,9 +103,12 @@ const TimesheetMoreActions = () => {
                 <button
                     type="button"
                     className="text-cyan-700"
-                    onClick={toggleDropdown}>
+                    onClick={toggleDropdown}
+                    data-tooltip-id="more-options"
+                    data-tooltip-content="More Options">
                     <BsThreeDotsVertical size={20} />
                 </button>
+                <Tooltip id="more-options" place="right" />
 
                 {/* Dropdown Menu */}
                 {isOpen && (
@@ -98,9 +116,9 @@ const TimesheetMoreActions = () => {
                         <ul className="py-1">
                             <li
                                 className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                onClick={handleSelectAll}>
+                                onClick={handleSelect}>
                                 <FaCheck className="mr-2 text-green-500" />
-                                Select Items
+                                {showSelectOptions ? "Hide items selection" : "Select Items"}
                             </li>
                             <li
                                 className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -108,9 +126,33 @@ const TimesheetMoreActions = () => {
                                 <FaTrash className="mr-2 text-red-500" />
                                 Clear All Timesheets
                             </li>
+                            <li
+                                className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer border-t border-gray-200"
+                                onClick={handleClose}>
+                                <FaTimes className="mr-2 text-gray-500" />
+                                Close
+                            </li>
                         </ul>
                     </div>
                 )}
+
+                {selectedRows.length > 0 && (<div className="ml-2 flex space-x-2">
+                    <button
+                        type="button"
+                        className="flex items-center px-4 py-2 bg-orange-600 text-white font-medium rounded shadow hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-opacity-50 transition-colors"
+                        onClick={handleDeleteSelected}>
+                        <FaTrash className="mr-2" />
+                        Delete Selected
+                    </button>
+                    <button
+                        type="button"
+                        className="flex items-center px-4 py-2 bg-cyan-600 text-white font-medium rounded shadow hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-opacity-50 transition-colors"
+                        onClick={handleCopySelected}>
+                        <FaCopy className="mr-2" />
+                        Copy Selected
+                    </button>
+                </div>)}
+
             </div>
             <div className='flex space-x-6'>
                 <div className="text-orange-500 dark:text-orange-300  font-bold">

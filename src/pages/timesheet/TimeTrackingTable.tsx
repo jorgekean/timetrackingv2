@@ -6,103 +6,36 @@ import { TimesheetService } from './TimesheetService';
 import DexieUtils from '../../utils/dexie-utils';
 import { TimesheetData } from '../../models/Timesheet';
 import { ErrorModel } from '../../models/ErrorModel';
-import { MiscTimeData } from '../../models/MiscTime';
 import { SettingsService } from '../settings/SettingsService';
 import TimerComponent from './TimerComponent';
 import toast from 'react-hot-toast';
-import { BsThreeDots, BsThreeDotsVertical } from 'react-icons/bs';
-import { Tooltip } from 'react-tooltip';
 import TimesheetMoreActions from './TimesheetMoreActions';
+import { useTimesheetContext } from './TimesheetContext';
 
 interface TimeTrackingTableProps {
-    // entries: TimesheetData[];
-    // onEdit: (id: number) => void;
-    // onDelete: (id: number) => void;
+
 }
-
-// // List of background colors for badges
-// const badgeColors = [
-//     // Dark shades
-//     'bg-gray-800',
-//     'bg-blue-800',
-//     'bg-green-800',
-//     'bg-indigo-800',
-//     'bg-purple-800',
-//     'bg-teal-800',
-//     'bg-red-800',
-//     'bg-yellow-800',
-//     'bg-orange-800',
-//     'bg-pink-800',
-//     'bg-cyan-800',
-//     'bg-emerald-800',
-//     'bg-lime-800',
-//     'bg-amber-800',
-//     'bg-violet-800',
-
-//     // Medium shades
-//     'bg-gray-600',
-//     'bg-blue-600',
-//     'bg-green-600',
-//     'bg-indigo-600',
-//     'bg-purple-600',
-//     'bg-teal-600',
-//     'bg-red-600',
-//     'bg-yellow-600',
-//     'bg-orange-600',
-//     'bg-pink-600',
-//     'bg-cyan-600',
-//     'bg-emerald-600',
-//     'bg-lime-600',
-//     'bg-amber-600',
-//     'bg-violet-600',
-
-//     // Light shades
-//     'bg-gray-400',
-//     'bg-blue-400',
-//     'bg-green-400',
-//     'bg-indigo-400',
-//     'bg-purple-400',
-//     'bg-teal-400',
-//     'bg-red-400',
-//     'bg-yellow-400',
-//     'bg-orange-400',
-//     'bg-pink-400',
-//     'bg-cyan-400',
-//     'bg-emerald-400',
-//     'bg-lime-400',
-//     'bg-amber-400',
-//     'bg-violet-400',
-// ];
-// // Function to consistently map a project name to a color
-// const getColorForProject = (projectName: string) => {
-//     // Generate a hash value using the reduce method
-//     const hash = projectName
-//         .split('')
-//         .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-
-//     // Use the hash value to select a color from the badgeColors array
-//     const index = hash % badgeColors.length;
-//     return badgeColors[index];
-// };
-
 
 const TimeTrackingTable: React.FC<TimeTrackingTableProps> = () => {
 
-    const { timesheets, timesheetDate, modalState, setTimesheets, setEditingTimesheet, setModalState } = useGlobalContext()
+    const [selectAllChecked, setSelectAllChecked] = useState(false)
+    // const [selectedRows, setSelectedRows] = useState<TimesheetData[]>([])
 
+    const { timesheets, timesheetDate, modalState, setTimesheets, setEditingTimesheet, setModalState } = useGlobalContext()
+    const { showSelectOptions, selectedRows, setSelectedRows } = useTimesheetContext()
 
     const db = DexieUtils<TimesheetData>({
         tableName: "timesheet",
     })
-    const copiedTimesheetsDB = DexieUtils<TimesheetData>({
-        tableName: "copiedTimesheet",
-    })
+    // const copiedTimesheetsDB = DexieUtils<TimesheetData>({
+    //     tableName: "copiedTimesheet",
+    // })
     const errorDB = DexieUtils<ErrorModel>({
         tableName: "fuse-logs",
     })
-    const miscDB = DexieUtils<MiscTimeData>({
-        tableName: "miscTime",
-    })
+    // const miscDB = DexieUtils<MiscTimeData>({
+    //     tableName: "miscTime",
+    // })
 
     const timesheetService = TimesheetService()
     const settingsService = SettingsService()
@@ -111,12 +44,22 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = () => {
         const fetchData = async () => {
             // console.log
             const timesheetsFromDB = await timesheetService.getTimesheetsOfTheDay()
-            console.log(timesheetsFromDB)
             setTimesheets(timesheetsFromDB)
+
+            setSelectAllChecked(false)
+            setSelectedRows([])
         }
 
         fetchData()
     }, [timesheetDate])
+
+    useEffect(() => {
+        if (selectAllChecked) {
+            setSelectedRows(timesheets)
+        } else {
+            setSelectedRows([])
+        }
+    }, [selectAllChecked, timesheets])
 
     const handleEdit = async (data: TimesheetData) => {
         // Implement delete logic here
@@ -189,6 +132,24 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = () => {
                 stack: error.stack || String(error),
                 timestamp: new Date(),
             });
+        }
+    }
+
+    const handleSelectAllChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        setSelectAllChecked(event.target.checked)
+    }
+
+    const handleCheckboxChange = (
+        event: React.ChangeEvent<HTMLInputElement>,
+        row: TimesheetData
+    ) => {
+        if (event.target.checked) {
+            alert()
+            setSelectedRows([...selectedRows, row])
+        } else {
+            setSelectedRows(selectedRows.filter((x) => x.id !== row.id))
         }
     }
 
@@ -287,6 +248,18 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = () => {
                                         {...restHeaderGroupProps}
                                         className="bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300"
                                     >
+                                        {showSelectOptions && (
+                                            <th>
+                                                {" "}
+                                                <input
+                                                    type="checkbox"
+                                                    className="form-checkbox h-5 w-5 text-cyan-600 border-gray-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 rounded"
+                                                    checked={selectAllChecked}
+                                                    onChange={handleSelectAllChange}
+                                                />
+                                            </th>
+                                        )
+                                        }
                                         {headerGroup.headers.map((column) => {
                                             const { key: columnKey, ...restColumnProps } = column.getHeaderProps();
                                             return (
@@ -317,12 +290,25 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = () => {
                                             ? "text-cyan-600 font-semibold border-l-4 border-cyan-500"
                                             : ""
                                             }
-                                                     ${index % 2 === 0
+                            ${index % 2 === 0
                                                 ? "bg-gray-50 dark:bg-gray-500"
                                                 : "bg-white dark:bg-gray-600"
                                             }
-                                                     hover:bg-gray-100 dark:hover:bg-gray-400 transition-colors`}
+                            hover:bg-gray-100 dark:hover:bg-gray-400 transition-colors`}
                                     >
+
+                                        {showSelectOptions && (
+                                            <td className="p-3 text-center">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedRows.some(
+                                                        (selectedRow) => selectedRow.id === row.original.id
+                                                    )}
+                                                    onChange={(e) => handleCheckboxChange(e, row.original)}
+                                                    className="form-checkbox h-5 w-5 text-cyan-600 border-gray-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 rounded"
+                                                />
+                                            </td>
+                                        )}
                                         {row.cells.map((cell) => {
                                             const { key, ...cellProps } = cell.getCellProps();
                                             return (
@@ -339,6 +325,7 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = () => {
                                 );
                             })}
                         </tbody>
+
                     </table>
                 )}
             </div>
