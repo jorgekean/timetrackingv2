@@ -1,6 +1,6 @@
 import { Combobox, ComboboxButton, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/react';
 import React, { useEffect, useState } from 'react';
-import { FaSave } from 'react-icons/fa';
+import { FaSave, FaTimes } from 'react-icons/fa';
 import { FaArrowDown, FaCaretDown, FaXmark } from 'react-icons/fa6';
 import FuseTextArea from '../../components/shared/forms/FuseTextArea';
 import FuseCombobox from '../../components/shared/forms/FuseCombobox';
@@ -136,28 +136,6 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
         }
     }, [editingTimesheet])
 
-    // const processPrevRunningTimesheet = async () => {
-    //     const prevRunningTS = timesheets.find(x => x.running);
-    //     let prevRunningDuration = 0;
-    //     if (prevRunningTS) {
-    //         prevRunningDuration = prevRunningTS.duration!// prev running duration when click on other timer
-    //     }
-
-    //     // calculate duration of prev running timesheet, based on fuse-startTime before it resets     
-    //     const currentTime = new Date()
-    //     const prevStartTime = localStorage.getItem("fuse-startTime") ? new Date(JSON.parse(localStorage.getItem("fuse-startTime")!)) : null
-    //     if (currentTime instanceof Date && prevStartTime instanceof Date) {
-    //         const elapsedTime = currentTime.getTime() - prevStartTime.getTime()
-
-    //         prevRunningDuration = prevRunningDuration! + Math.floor(elapsedTime / 1000)
-    //     }
-    //     // update prev running timesheet if any - set running false and refresh state    
-    //     if (prevRunningTS) {
-    //         await timesheetService.updateTimesheet({ ...prevRunningTS, duration: prevRunningDuration, running: false })
-    //         // setTimesheets(await timesheetService.getTimesheetsOfTheDay())
-    //     }
-    // }
-
     const addTimesheet = async () => {
         const newTimesheet: TimesheetData = formData
 
@@ -233,26 +211,23 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
         setFormData((prevState) => ({ ...prevState, [name]: value }))
     }
 
-    function handleClientTypeaheadChange(value: any) {
-        const selectedClient = value.selected[0]
-        setFormData((prevState) => ({
-            ...prevState,
-            client: selectedClient,
-            clientStr: selectedClient?.client,
-        }))
-    }
-
     const convertToSeconds = (time: string): number => {
         const [hours, minutes, seconds] = time.split(":").map(Number)
         return hours * 3600 + minutes * 60 + seconds
     }
 
-    const handleDurationChange = (value: string) => {
-        setFormData({
-            ...formData,
-            durationStr: value,
+    const handleDurationChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = event.target
+        setFormData((prevState) => ({
+            ...prevState,
+            [name]: value,
             duration: convertToSeconds(value),
-        })
+        }))
+        // setFormData({
+        //     ...formData,
+        //     durationStr: value,
+        //     duration: convertToSeconds(value),
+        // })
     }
 
     const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (
@@ -268,7 +243,7 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
                 position: "top-right",
             })
         }
-
+        setEditingTimesheet(undefined)
     }
 
     return (
@@ -310,18 +285,27 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
                     <FuseInput
                         name="durationStr"
                         value={formData.durationStr!}
-                        onChange={handleInputChange}
+                        onChange={handleDurationChange}
                         placeholder="00:00:00"
                         type="text"
                     />
                 </div>
 
+                {editingTimesheet && (<button
+                    type="button"
+                    onClick={() => setEditingTimesheet(undefined)}
+                    className="flex items-center justify-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                    <FaTimes />
+                    <span>Cancel</span>
+                </button>)}
                 <button
                     type="submit"
                     className="flex items-center justify-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-cyan-600 rounded-md hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 >
-                    <span>Save</span>
                     <FaSave size={16} />
+                    <span>Save</span>
+
                 </button>
             </div>
         </form>

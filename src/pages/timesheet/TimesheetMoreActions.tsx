@@ -187,6 +187,13 @@ const TimesheetMoreActions = () => {
                 {copiedRows.length > 0 && (<div className="ml-2 flex space-x-2">
                     <button
                         type="button"
+                        className="flex items-center px-4 py-2 bg-gray-600 text-white font-medium rounded shadow hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition-colors"
+                        onClick={() => setCopiedRows([])}>
+                        <FaTimes className="mr-2" />
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
                         className="flex items-center px-4 py-2 bg-cyan-600 text-white font-medium rounded shadow hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-opacity-50 transition-colors"
                         onClick={handlePasteSelected}>
                         <FaCopy className="mr-2" />
