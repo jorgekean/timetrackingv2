@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BsThreeDotsVertical } from 'react-icons/bs'
 import { FaCheck, FaCopy, FaTimes, FaTrash } from 'react-icons/fa';
 import { useGlobalContext } from '../../context/GlobalContext';
@@ -13,6 +13,7 @@ import { set } from 'lodash';
 
 const TimesheetMoreActions = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [totalHours, setTotalHours] = useState(0);
 
     const { timesheets, modalState, timesheetDate, setTimesheets, setModalState } = useGlobalContext();
     const { showSelectOptions, selectedRows, copiedRows, setShowSelectOptions, setCopiedRows, setSelectedRows } = useTimesheetContext();
@@ -25,6 +26,17 @@ const TimesheetMoreActions = () => {
     })
 
     const timesheetService = TimesheetService();
+
+    useEffect(() => {
+
+        // compute total hours
+        let total = 0;
+        timesheets.forEach((ts) => {
+            total += ts.duration!;
+        });
+
+        setTotalHours(total);
+    }, [timesheetDate, timesheets])
 
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
@@ -213,8 +225,7 @@ const TimesheetMoreActions = () => {
                 <div className="text-orange-500 dark:text-orange-300 font-bold">
                     Total Hours:
                     <span className="ml-2 text-orange-600 dark:text-orange-400">
-                        {/* Replace with actual total hours value */}
-                        08:15:00
+                        {timesheetService.formatDuration(totalHours)}
                     </span>
                 </div>
             </div>
