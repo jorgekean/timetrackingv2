@@ -8,12 +8,14 @@ import { TimesheetData } from '../../models/Timesheet';
 import { ErrorModel } from '../../models/ErrorModel';
 import { Tooltip } from 'react-tooltip';
 import { useTimesheetContext } from './TimesheetContext';
+import { TimesheetService } from './TimesheetService';
+import { set } from 'lodash';
 
 const TimesheetMoreActions = () => {
     const [isOpen, setIsOpen] = useState(false);
 
-    const { timesheets, modalState, setTimesheets, setModalState } = useGlobalContext();
-    const { showSelectOptions, selectedRows, setShowSelectOptions } = useTimesheetContext();
+    const { timesheets, modalState, timesheetDate, setTimesheets, setModalState } = useGlobalContext();
+    const { showSelectOptions, selectedRows, copiedRows, setShowSelectOptions, setCopiedRows, setSelectedRows } = useTimesheetContext();
 
     const db = DexieUtils<TimesheetData>({
         tableName: "timesheet",
@@ -21,6 +23,8 @@ const TimesheetMoreActions = () => {
     const errorDB = DexieUtils<ErrorModel>({
         tableName: "fuse-logs",
     })
+
+    const timesheetService = TimesheetService();
 
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
@@ -87,13 +91,41 @@ const TimesheetMoreActions = () => {
         setIsOpen(false); // Close the dropdown
     };
 
-    const handleDeleteSelected = () => {
-        // setIsOpen(false); // Close the dropdown
+    const handleDeleteSelected = async () => {
+
+        selectedRows.forEach(async (ts) => {
+            await db.deleteEntity(ts.id!)
+        })
+        const newTimesheets = await timesheetService.getTimesheetsOfTheDay();
+        setTimesheets(newTimesheets)
+
+        toast.success("Timesheet deleted successfully", { position: "top-right" });
+        setShowSelectOptions(false);
+
     };
 
     const handleCopySelected = () => {
-        // setIsOpen(false); // Close the dropdown
+
+        setCopiedRows(selectedRows);
+
+        setShowSelectOptions(false);
+        setSelectedRows([]);
     };
+
+    const handlePasteSelected = async () => {
+        copiedRows.forEach(async (ts: TimesheetData) => {
+            const newTimesheet = { ...ts, id: undefined, duration: 0, running: false, createdDate: new Date(), timesheetDate: timesheetDate }
+            await db.add(newTimesheet)
+        })
+
+        toast.success("Timesheet copied successfully", { position: "top-right" });
+        setShowSelectOptions(false);
+        setCopiedRows([]);
+
+        // refresh
+        const newTimesheets = await timesheetService.getTimesheetsOfTheDay();
+        setTimesheets(newTimesheets)
+    }
 
 
     return (
@@ -150,6 +182,15 @@ const TimesheetMoreActions = () => {
                         onClick={handleCopySelected}>
                         <FaCopy className="mr-2" />
                         Copy Selected
+                    </button>
+                </div>)}
+                {copiedRows.length > 0 && (<div className="ml-2 flex space-x-2">
+                    <button
+                        type="button"
+                        className="flex items-center px-4 py-2 bg-cyan-600 text-white font-medium rounded shadow hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-opacity-50 transition-colors"
+                        onClick={handlePasteSelected}>
+                        <FaCopy className="mr-2" />
+                        Paste Selected
                     </button>
                 </div>)}
 

@@ -7,6 +7,7 @@ enum ActionType {
     // SET_BILLINGS = "SET_BILLINGS",
     SET_SHOWSELECTOPTIONS = "SET_SHOWSELECTOPTIONS",
     SET_SELECTEDITEMS = "SET_SELECTEDITEMS",
+    SET_COPIEDROWS = "SET_COPIEDROWS",
 }
 
 
@@ -14,12 +15,14 @@ enum ActionType {
 interface TimesheetContextData {
     selectedRows: TimesheetData[]
     showSelectOptions: boolean
+    copiedRows: TimesheetData[]
 }
 
 
 interface TimesheetContextValue extends TimesheetContextData {
     setSelectedRows: (selectedRows: TimesheetData[]) => void
     setShowSelectOptions: (showSelectOptions: boolean) => void
+    setCopiedRows: (selectedRows: TimesheetData[]) => void
 }
 
 interface Action {
@@ -29,7 +32,8 @@ interface Action {
 
 const initialState: TimesheetContextData = {
     selectedRows: [],
-    showSelectOptions: false
+    showSelectOptions: false,
+    copiedRows: []
 }
 
 const reducer = (state: TimesheetContextData, action: Action): TimesheetContextData => {
@@ -38,6 +42,8 @@ const reducer = (state: TimesheetContextData, action: Action): TimesheetContextD
             return { ...state, selectedRows: action.payload }
         case ActionType.SET_SHOWSELECTOPTIONS:
             return { ...state, showSelectOptions: action.payload }
+        case ActionType.SET_COPIEDROWS:
+            return { ...state, copiedRows: action.payload }
         default:
             return state
     }
@@ -47,7 +53,8 @@ export const TimesheetContext = createContext<TimesheetContextValue>({
     ...initialState,
 
     setSelectedRows: () => { },
-    setShowSelectOptions: () => { }
+    setShowSelectOptions: () => { },
+    setCopiedRows: () => { }
 })
 
 type TimesheetContextProviderProps = {
@@ -63,7 +70,11 @@ const TimesheetContextProvider = ({ children }: TimesheetContextProviderProps) =
     }
 
     const setSelectedRows = (selectedRows: TimesheetData[]) => {
-        dispatch({ type: ActionType.SET_SHOWSELECTOPTIONS, payload: selectedRows })
+        dispatch({ type: ActionType.SET_SELECTEDITEMS, payload: selectedRows })
+    }
+
+    const setCopiedRows = (selectedRows: TimesheetData[]) => {
+        dispatch({ type: ActionType.SET_COPIEDROWS, payload: selectedRows })
     }
 
     return (
@@ -71,7 +82,8 @@ const TimesheetContextProvider = ({ children }: TimesheetContextProviderProps) =
             value={{
                 ...state,
                 setSelectedRows,
-                setShowSelectOptions
+                setShowSelectOptions,
+                setCopiedRows
             }}
         >
             {children}

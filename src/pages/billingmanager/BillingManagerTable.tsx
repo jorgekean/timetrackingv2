@@ -20,7 +20,7 @@ interface BillingManagerTableProps {
 
 const BillingManagerTable: React.FC<BillingManagerTableProps> = ({ }) => {
     const [searchTerm, setSearchTerm] = useState('');
-    const { modalState, setModalState, setEditingBillingManager } =
+    const { modalState, setModalState, setEditingBillingManager, timesheetDate } =
         useGlobalContext()
 
     const { billings, setBillings, showArchived, setShowArchived } =

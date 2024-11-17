@@ -30,7 +30,7 @@ const Calendar = ({ }: CalendarProps) => {
     const timesheetService = TimesheetService();
 
     useEffect(() => {
-        setTimesheetDate(timesheetDate);
+        // setTimesheetDate(timesheetDate);
 
         const fetchWorkLocations = async () => {
             try {

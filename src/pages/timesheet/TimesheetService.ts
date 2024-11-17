@@ -23,20 +23,21 @@ export const TimesheetService = () => {
         setTimesheets(await getTimesheetsOfTheDay())
     }
     const getTimesheetsOfTheDay = async () => {
+        // alert(timesheetDate)
         const selectedTimesheetDate = timesheetDate.setHours(0, 0, 0, 0)
         const currentDate = new Date().setHours(0, 0, 0, 0)
         const timesheetsOfToday = (await db.getAll())
-            .map((timesheet) => {
-                // Update the running property to false if the date is in the past
-                if (
-                    timesheet.running &&
-                    timesheet.timesheetDate.setHours(0, 0, 0, 0) < currentDate
-                ) {
-                    timesheet.running = false
-                    db.update(timesheet)
-                }
-                return timesheet
-            })
+            // .map((timesheet) => {
+            //     // Update the running property to false if the date is in the past
+            //     if (
+            //         timesheet.running &&
+            //         timesheet.timesheetDate.setHours(0, 0, 0, 0) < currentDate
+            //     ) {
+            //         timesheet.running = false
+            //         db.update(timesheet)
+            //     }
+            //     return timesheet
+            // })
             .filter(
                 (f) => f.timesheetDate.setHours(0, 0, 0, 0) === selectedTimesheetDate
             )

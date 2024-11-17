@@ -42,7 +42,7 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            // console.log
+            console.log(timesheetDate, "time")
             const timesheetsFromDB = await timesheetService.getTimesheetsOfTheDay()
             setTimesheets(timesheetsFromDB)
 
@@ -80,14 +80,10 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = () => {
 
         const updatedTimesheet = await db.get(data.id!)
         setEditingTimesheet(updatedTimesheet)
-        // setEditingTimesheet({
-        //     ...updatedTimesheet,
-        //     running: false,
-        //     // duration: timerRefs.current[data.id!]?.duration,
-        // })
     }
 
     const handleDelete = async (id: string) => {
+
         try {
             setModalState({
                 title: "Delete",
@@ -105,14 +101,19 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = () => {
                             No
                         </button>
                         <button
+                            type="button"
                             onClick={async () => {
                                 await db.deleteEntity(id)
                                 toast.success("Timesheet deleted successfully", {
                                     position: "top-right",
                                 });
 
-                                // refresh
-                                const timesheetsOfToday = await timesheetService.getTimesheetsOfTheDay()
+                                // refresh            
+
+                                const timesheetsOfToday = (await db.getAll()).filter(
+                                    (f) => f.timesheetDate.setHours(0, 0, 0, 0) === timesheetDate.setHours(0, 0, 0, 0)
+                                )
+                                    .sort((a, b) => a.createdDate.getTime() - b.createdDate.getTime())
                                 setTimesheets(timesheetsOfToday)
 
                                 setModalState({ ...modalState, showModal: false });
@@ -146,7 +147,7 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = () => {
         row: TimesheetData
     ) => {
         if (event.target.checked) {
-            alert()
+            // alert(JSON.stringify(row))
             setSelectedRows([...selectedRows, row])
         } else {
             setSelectedRows(selectedRows.filter((x) => x.id !== row.id))
@@ -205,7 +206,7 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = () => {
                 ),
             },
         ] as any,
-        []
+        [timesheetDate]
     )
 
     const {
