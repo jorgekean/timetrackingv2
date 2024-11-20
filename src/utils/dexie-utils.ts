@@ -58,6 +58,25 @@ function DexieUtils<T extends Entity>({
     return db.table<T>(tableName)
   }
 
+
+  /**
+   * Search for entities by a specific field and value
+   * @param field The field name to search by
+   * @param value The value to search for
+   * @returns A promise that resolves to an array of matching entities
+   */
+  async function searchByField(
+    field: keyof T,
+    value: IndexableType
+  ): Promise<T[]> {
+    // Ensure the field is indexed
+    const storeDefinition = { [tableName]: `id,${field as string}` }
+    if (db.verno < 2) db.version(2).stores(storeDefinition)
+
+    // Search for entities
+    return db.table<T>(tableName).where(field as string).equals(value).toArray()
+  }
+
   return {
     getAll,
     get,
@@ -65,6 +84,7 @@ function DexieUtils<T extends Entity>({
     update,
     deleteEntity,
     getEntity,
+    searchByField
   }
 }
 

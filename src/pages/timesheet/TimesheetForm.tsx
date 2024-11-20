@@ -13,6 +13,7 @@ import { ErrorModel } from '../../models/ErrorModel';
 import { TimesheetService } from './TimesheetService';
 import toast from 'react-hot-toast';
 import TimeInputComponent from './__noteused_TimeInputComponent';
+import { MiscTimeData } from '../../models/MiscTime';
 
 interface TimesheetFormProps { }
 
@@ -66,6 +67,9 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
     })
     const errorDB = DexieUtils<ErrorModel>({
         tableName: "fuse-logs",
+    })
+    const miscDB = DexieUtils<MiscTimeData>({
+        tableName: "miscTime",
     })
 
     const timesheetService = TimesheetService()
@@ -179,6 +183,23 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
                     ? 0
                     : newTimesheet.duration
                 const id = await db.add(newTimesheet)
+
+                // Check if there's already an entry for the given timesheetDate - for refactor?
+                const allTimers = await miscDB.getAll()
+                const miscTimer = allTimers.find(
+                    (f) =>
+                        f.timesheetDate.setHours(0, 0, 0, 0) ===
+                        timesheetDate.setHours(0, 0, 0, 0)
+                )
+                // Add a new timer if it doesn't exist
+                if (!miscTimer) {
+                    const newMiscTimer: MiscTimeData = {
+                        timesheetDate,
+                        duration: 0,
+                        running: false,
+                    }
+                    await miscDB.add(newMiscTimer)
+                }
             }
 
             // Refresh timesheets for the day

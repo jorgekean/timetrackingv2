@@ -11,6 +11,7 @@ import TimerComponent from './TimerComponent';
 import toast from 'react-hot-toast';
 import TimesheetMoreActions from './TimesheetMoreActions';
 import { useTimesheetContext } from './TimesheetContext';
+import { MiscTimeData } from '../../models/MiscTime';
 
 interface TimeTrackingTableProps {
 
@@ -21,7 +22,7 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = () => {
     const [selectAllChecked, setSelectAllChecked] = useState(false)
     // const [selectedRows, setSelectedRows] = useState<TimesheetData[]>([])
 
-    const { timesheets, timesheetDate, modalState, setTimesheets, setEditingTimesheet, setModalState } = useGlobalContext()
+    const { timesheets, timesheetDate, modalState, miscTime, setTimesheets, setEditingTimesheet, setModalState, setMiscTime } = useGlobalContext()
     const { showSelectOptions, selectedRows, setSelectedRows } = useTimesheetContext()
 
     const db = DexieUtils<TimesheetData>({
@@ -33,25 +34,118 @@ const TimeTrackingTable: React.FC<TimeTrackingTableProps> = () => {
     const errorDB = DexieUtils<ErrorModel>({
         tableName: "fuse-logs",
     })
-    // const miscDB = DexieUtils<MiscTimeData>({
-    //     tableName: "miscTime",
-    // })
+    const miscDB = DexieUtils<MiscTimeData>({
+        tableName: "miscTime",
+    })
 
     const timesheetService = TimesheetService()
     const settingsService = SettingsService()
 
+    const fetchMiscTime = async () => {
+        const allTimers = await miscDB.getAll()
+        return allTimers.find(
+            (f) =>
+                f.timesheetDate.setHours(0, 0, 0, 0) ===
+                timesheetDate.setHours(0, 0, 0, 0)
+        )
+    }
+
     useEffect(() => {
         const fetchData = async () => {
-            console.log(timesheetDate, "time")
+            // console.log(timesheetDate, "time")
             const timesheetsFromDB = await timesheetService.getTimesheetsOfTheDay()
             setTimesheets(timesheetsFromDB)
 
             setSelectAllChecked(false)
             setSelectedRows([])
+
+            const miscTimer = await fetchMiscTime()
+            setMiscTime(miscTimer?.duration ?? 0)
         }
 
         fetchData()
     }, [timesheetDate])
+    useEffect(() => {
+        let intervalId: NodeJS.Timeout | null = null;
+
+        const fetchData = async () => {
+            const isToday =
+                new Date().setHours(0, 0, 0, 0) === timesheetDate.setHours(0, 0, 0, 0);
+
+            console.log(`Is timesheetDate today? ${isToday}`);
+
+            if (!isToday) {
+                console.log("Not today's date, exiting fetchData.");
+                return; // Exit early if the date is not today
+            }
+
+            const runningTimesheet = timesheets.find((x) => x.running);
+            const storedMiscTime = localStorage.getItem("fuse-miscTime");
+
+            console.log("Running timesheet:", runningTimesheet);
+
+            // Handle localStorage for miscTime
+            if (!runningTimesheet && !storedMiscTime) {
+                console.log("No running timesheet, setting miscTime in localStorage.");
+                localStorage.setItem("fuse-miscTime", JSON.stringify(new Date()));
+            }
+
+            if (runningTimesheet) {
+                console.log("Running timesheet found, clearing miscTime in localStorage.");
+                localStorage.removeItem("fuse-miscTime");
+
+                const miscTimer = (await miscDB.getAll()).find(
+                    (x) =>
+                        x.timesheetDate.setHours(0, 0, 0, 0) ===
+                        timesheetDate.setHours(0, 0, 0, 0)
+                );
+
+                if (miscTimer) {
+                    miscTimer.duration = miscTime;
+                    console.log("Updating miscTimer in the database:", miscTimer);
+                    await miscDB.update(miscTimer);
+                }
+            }
+
+            // Function to calculate miscTime
+            const calculateMiscTime = async () => {
+                const storedTime = localStorage.getItem("fuse-miscTime");
+
+                if (storedTime) {
+                    const currentTime = new Date();
+                    const startTime = new Date(JSON.parse(storedTime));
+
+                    if (currentTime instanceof Date && startTime instanceof Date) {
+                        const elapsedTime = currentTime.getTime() - startTime.getTime();
+
+                        const miscTimer = await fetchMiscTime();
+
+                        if (miscTimer) {
+                            console.log("Calculating miscTime:", elapsedTime);
+                            setMiscTime(miscTimer.duration! + Math.floor(elapsedTime / 1000));
+                        }
+                    }
+                }
+            };
+
+            // Start the interval to calculate miscTime
+            calculateMiscTime();
+
+            intervalId = setInterval(calculateMiscTime, 1000);
+            console.log("Interval started for miscTime calculation.");
+        };
+
+        fetchData();
+
+        return () => {
+            if (intervalId) {
+                console.log("Cleaning up interval.");
+                clearInterval(intervalId);
+            }
+        };
+    }, [timesheetDate, timesheets]);
+
+
 
     useEffect(() => {
         if (selectAllChecked) {

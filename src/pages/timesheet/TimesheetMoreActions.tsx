@@ -15,7 +15,7 @@ const TimesheetMoreActions = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [totalHours, setTotalHours] = useState(0);
 
-    const { timesheets, modalState, timesheetDate, setTimesheets, setModalState } = useGlobalContext();
+    const { timesheets, modalState, timesheetDate, miscTime, setTimesheets, setModalState } = useGlobalContext();
     const { showSelectOptions, selectedRows, copiedRows, setShowSelectOptions, setCopiedRows, setSelectedRows } = useTimesheetContext();
 
     const db = DexieUtils<TimesheetData>({
@@ -218,8 +218,7 @@ const TimesheetMoreActions = () => {
                 <div className="text-orange-500 dark:text-orange-300  font-bold">
                     Misc Time:
                     <span className="ml-2 text-orange-600 dark:text-orange-400">
-                        {/* Replace with actual misc time value */}
-                        00:30:00
+                        {timesheetService.formatDuration(miscTime)}
                     </span>
                 </div>
                 <div className="text-orange-500 dark:text-orange-300 font-bold">

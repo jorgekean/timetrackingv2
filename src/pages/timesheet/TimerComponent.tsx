@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useGlobalContext } from "../../context/GlobalContext";
 import { TimesheetService } from "./TimesheetService";
 import { TimesheetData } from "../../models/Timesheet";
+import { MiscTimeData } from "../../models/MiscTime";
+import DexieUtils from "../../utils/dexie-utils";
 
 interface TimerComponentProps {
   timesheet: TimesheetData;
@@ -17,6 +19,7 @@ const TimerComponent: React.FC<TimerComponentProps> = ({ timesheet }) => {
       ? new Date(JSON.parse(localStorage.getItem("fuse-startTime")!))
       : null
   )
+
 
   const { timesheetDate, timesheets, setTimesheets } = useGlobalContext();
   const timesheetService = TimesheetService();
@@ -69,6 +72,7 @@ const TimerComponent: React.FC<TimerComponentProps> = ({ timesheet }) => {
     if (!isRunning) {
       localStorage.setItem("fuse-startTime", JSON.stringify(new Date()))
       setStartTime(new Date())
+
     } else {
       localStorage.removeItem("fuse-startTime")
       setStartTime(null)
@@ -84,9 +88,7 @@ const TimerComponent: React.FC<TimerComponentProps> = ({ timesheet }) => {
 
     // save timesheet every toggle
     await timesheetService.updateTimesheet({ ...timesheet, duration: duration, running: !isRunning })
-
-
-
+    setTimesheets(await timesheetService.getTimesheetsOfTheDay())
   };
 
   return (

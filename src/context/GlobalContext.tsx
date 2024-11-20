@@ -66,7 +66,7 @@ interface Action {
 }
 
 const initialState: FuseData = {
-    timesheetDate: new Date(),
+    timesheetDate: new Date(new Date().setHours(0, 0, 0, 0)),
     timesheets: [],
     editingTimesheet: undefined,
     editingBillingManager: undefined,
