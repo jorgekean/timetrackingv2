@@ -14,6 +14,7 @@ import { TimesheetService } from './TimesheetService';
 import toast from 'react-hot-toast';
 import TimeInputComponent from './__noteused_TimeInputComponent';
 import { MiscTimeData } from '../../models/MiscTime';
+import { Clock } from 'react-feather';
 
 interface TimesheetFormProps { }
 
@@ -251,6 +252,20 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
         // })
     }
 
+    const handleDurationChangeText = (value: string) => {
+
+        setFormData((prevState) => ({
+            ...prevState,
+            durationStr: value,
+            duration: convertToSeconds(value),
+        }))
+        // setFormData({
+        //     ...formData,
+        //     durationStr: value,
+        //     duration: convertToSeconds(value),
+        // })
+    }
+
     const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (
         event
     ) => {
@@ -266,6 +281,29 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
         }
         setEditingTimesheet(undefined)
     }
+
+    const resetTime = () => {
+        handleDurationChangeText("00:00:00")
+    }
+
+    const handleDurationChangeFromDropdown = (delta: number) => {
+        const currentSeconds = timesheetService.timeToSeconds(formData.durationStr!)
+        let newSeconds = currentSeconds + delta
+        if (newSeconds < 0) newSeconds = 0 // Prevent negative time
+        handleDurationChangeText(timesheetService.secondsToTime(newSeconds))
+
+        closeDropdown();
+    }
+
+    const [isOpen, setIsOpen] = useState(false);
+
+    const toggleDropdown = () => {
+        setIsOpen((prev) => !prev);
+    };
+
+    const closeDropdown = () => {
+        setIsOpen(false);
+    };
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full space-y-4">
@@ -297,20 +335,119 @@ const TimesheetForm: React.FC<TimesheetFormProps> = () => {
                 </div>
 
                 {/* Duration Input */}
-                <div className="flex flex-col flex-1 max-w-32">
-                    {/* <TimeInputComponent
-                        placeholder='00:00:00'
-                        value={formData.durationStr!}
-                        onChange={handleInputChange}
-                    /> */}
+                <div className="flex items-center space-x-1">
+                    {/* FuseInput */}
                     <FuseInput
                         name="durationStr"
                         value={formData.durationStr!}
                         onChange={handleDurationChange}
                         placeholder="00:00:00"
                         type="text"
+                    // className="px-4 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     />
+
+                    {/* Dropdown Button */}
+                    <div className="relative inline-block text-left">
+                        <button
+                            type="button"
+                            onClick={toggleDropdown}
+                            className="flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none"
+                            aria-haspopup="true"
+                            aria-expanded={isOpen}
+                        >
+                            <Clock size={18} />
+                        </button>
+
+                        {/* Dropdown Menu */}
+                        {isOpen && (
+                            <div
+                                className="absolute right-0 z-10 w-40 mt-2 origin-top-right bg-white border border-gray-200 divide-y divide-gray-100 rounded-md shadow-lg focus:outline-none"
+                                role="menu"
+                                aria-orientation="vertical"
+                                aria-labelledby="dropdown-button"
+                            >
+                                <ul className="py-1">
+                                    <li>
+                                        <button
+                                            className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
+                                            onClick={() => {
+                                                closeDropdown();
+                                                resetTime();
+                                            }}
+                                        >
+                                            Reset Time
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button
+                                            className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
+                                            onClick={() => handleDurationChangeFromDropdown(300)}
+                                        >
+                                            +5 mins
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button
+                                            className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
+                                            onClick={() => handleDurationChangeFromDropdown(900)}
+                                        >
+                                            +15 mins
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button
+                                            className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
+                                            onClick={() => handleDurationChangeFromDropdown(1800)}
+                                        >
+                                            +30 mins
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button
+                                            className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
+                                            onClick={() => handleDurationChangeFromDropdown(3600)}
+                                        >
+                                            +1 hour
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button
+                                            className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
+                                            onClick={() => handleDurationChangeFromDropdown(-300)}
+                                        >
+                                            -5 mins
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button
+                                            className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
+                                            onClick={() => handleDurationChangeFromDropdown(-900)}
+                                        >
+                                            -15 mins
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button
+                                            className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
+                                            onClick={() => handleDurationChangeFromDropdown(-1800)}
+                                        >
+                                            -30 mins
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button
+                                            className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
+                                            onClick={() => handleDurationChangeFromDropdown(-3600)}
+                                        >
+                                            -1 hour
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        )}
+                    </div>
                 </div>
+
 
                 {editingTimesheet && (<button
                     type="button"
