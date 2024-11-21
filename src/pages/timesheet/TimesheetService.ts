@@ -268,6 +268,17 @@ export const TimesheetService = () => {
         }
     }
 
+    const stopAllRunningTasks = async () => {
+        const runningTasks = (await db.getAll()).filter(x => x.running);
+
+        runningTasks.forEach(async (rt) => {
+            rt.running = false;
+            await db.update(rt);
+        });
+
+        setTimesheets(await getTimesheetsOfTheDay())
+    }
+
     return {
         getTimesheetsOfTheDay: getTimesheetsOfTheDay,
         setRunningToFalse,
@@ -279,6 +290,7 @@ export const TimesheetService = () => {
         timeToSeconds,
         secondsToTime,
         parseShorthandTime,
-        processPrevRunningTimesheet
+        processPrevRunningTimesheet,
+        stopAllRunningTasks
     }
 }
